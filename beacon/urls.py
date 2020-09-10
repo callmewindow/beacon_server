@@ -1,4 +1,4 @@
-"""fire URL Configuration
+"""beacon URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/1.11/topics/http/urls/
@@ -15,9 +15,10 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from fire import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    
-
+    url(r'^test_add/', views.test_add),
+    url(r'^test_find/', views.test_find)
 ]
