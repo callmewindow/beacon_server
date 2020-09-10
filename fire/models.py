@@ -105,6 +105,7 @@ class Videos(models.Model):
     video_duration = models.TimeField(blank=True, null=True)
     local_address = models.CharField(max_length=100, blank=True, null=True)
     course = models.ForeignKey(Course, models.DO_NOTHING, blank=True, null=True)
+    upload_time = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         db_table = 'videos'
