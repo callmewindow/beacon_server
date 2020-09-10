@@ -23,7 +23,9 @@ from api import jyh
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),    
-    path(r'video/play/', jyh.getVideo),
+    
     url(r'^test_add/', views.test_add),
-    url(r'^test_find/', views.test_find)
+    url(r'^test_find/', views.test_find),
+
+    url(r'video/play/', jyh.getVideo),
 ]
