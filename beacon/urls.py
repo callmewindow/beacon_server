@@ -18,6 +18,8 @@ from django.contrib import admin
 from fire import views
 from fire import api_jyh
 from fire import api_zzc
+from fire import api_ct
+
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),    
@@ -29,4 +31,5 @@ urlpatterns = [
 
 urlpatterns += api_jyh.url_jyh
 urlpatterns += api_zzc.url_zzc
+urlpatterns += api_ct.url_ct
 
