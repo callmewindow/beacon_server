@@ -133,6 +133,20 @@ class DjangoSession(models.Model):
         db_table = 'django_session'
 
 
+class Floor(models.Model):
+    author = models.ForeignKey('Userinfo', models.DO_NOTHING)
+    post = models.ForeignKey('Post', models.DO_NOTHING)
+    content = models.TextField(blank=True, null=True)
+    post_time = models.DateTimeField(blank=True, null=True)
+    floor_num = models.IntegerField()
+    reply_floor = models.IntegerField()
+    like_num = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'floor'
+
+
 class Post(models.Model):
     title = models.CharField(max_length=50)
     stared = models.IntegerField(blank=True, null=True)
