@@ -24,7 +24,7 @@ urlpatterns = [
     url(r'^test_add/', views.test_add),
     url(r'^test_find/', views.test_find),
 
-    url(r'video/play/', api_jyh.getVideo),
 ]
 
+urlpatterns += api_jyh.url_jyh
 

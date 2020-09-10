@@ -1,5 +1,8 @@
 from django.http import HttpResponse
-import pymysql
+from fire.models import Videos
+from fire.models import Course
+from django.conf.urls import url
+from django.forms.models import model_to_dict
 
 def getVideo(request):
     if(request.method != 'GET'): 
@@ -13,23 +16,13 @@ def getVideo(request):
         res = '{"message":' + msg +'}'
         return HttpResponse(res)
 
-    # 实际环境中应该是localhost
-    db = pymysql.connect("101.200.219.50", "fire", "Beacon123!")
+    # 找到指定的课
+    course = Course.objects.get(id=class_id)
+    # 找到指定课所对应的所有视频
+    videos = list(course.video_set.all().values())
 
-    cursor = db.cursor()
+    return HttpResponse(videos)
 
-    sql = '''
-        select * from videos
-    '''
-
-    '''
-        insert into videos(title, introduction, video_duration, local_address, course_id) values('先辈', '114514', now(), 'www.baidu.com', 114514);
-    '''
-
-    try:
-        cursor.execute(sql)
-    except Exception as e:
-        print(e)
-
-    db.close()
-
+url_jyh = [
+    url(r'video/play/', getVideo),
+]
