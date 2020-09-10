@@ -16,10 +16,7 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from fire import views
-
-from django.urls import path
-
-from api import jyh
+from fire import api_jyh
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),    
@@ -27,5 +24,7 @@ urlpatterns = [
     url(r'^test_add/', views.test_add),
     url(r'^test_find/', views.test_find),
 
-    url(r'video/play/', jyh.getVideo),
+    url(r'video/play/', api_jyh.getVideo),
 ]
+
+
