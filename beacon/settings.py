@@ -76,12 +76,21 @@ WSGI_APPLICATION = 'beacon.wsgi.application'
 
 DATABASES = {
     'default': {
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'beacon',
         'USER': 'fire',
         'PASSWORD': 'Beacon123!',
         'HOST': '',
-    }
+    },
+    # 'local': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'local',
+    #     'USER': 'root',
+    #     'PASSWORD': 'root',
+    #     'HOST': 'localhost',
+    # }
 }
 
 
