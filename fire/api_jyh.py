@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from fire.models import Videos
 from fire.models import Course
 from django.conf.urls import url
@@ -16,12 +16,22 @@ def getVideo(request):
         res = '{"message":' + msg +'}'
         return HttpResponse(res)
 
-    # 找到指定的课
-    course = Course.objects.get(id=class_id)
-    # 找到指定课所对应的所有视频
-    videos = list(course.video_set.all().values())
 
-    return HttpResponse(videos)
+    # 找到指定的课
+    videos = Videos.objects.filter(course_id=class_id)
+
+    if(len(videos) == 0):
+        msg = '未能找到id为' + class_id + '的课'
+        res = '{"message":' + msg +'}'
+        return HttpResponse(res)
+
+    videos_send = [x for x in videos.values()]
+
+    send = {}
+    send["videos"] = videos_send
+    send["message"] = "success"
+    
+    return JsonResponse(send, safe=False)
 
 url_jyh = [
     url(r'video/play/', getVideo),

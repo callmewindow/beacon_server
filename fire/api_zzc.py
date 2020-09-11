@@ -2,6 +2,7 @@ from django.shortcuts import render
 from fire.models import *
 from django.http.response import HttpResponse
 import datetime
+from django.conf.urls import url
 
 def createCourse(request):
     if(request.method != 'POST'):

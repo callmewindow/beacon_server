@@ -84,9 +84,9 @@ DATABASES = {
         'PASSWORD': 'Beacon123!',
         'HOST': '',
     },
-    # 'local': {
+    # 'default': {
     #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'local',
+    #     'NAME': 'xxq_backup',
     #     'USER': 'root',
     #     'PASSWORD': 'root',
     #     'HOST': 'localhost',
