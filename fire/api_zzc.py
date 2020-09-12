@@ -4,6 +4,7 @@ from django.http.response import HttpResponse
 import datetime
 import os
 from moviepy.editor import VideoFileClip
+from django.conf.urls import url
 
 def createCourse(request):
     if(request.method != 'POST'):
@@ -208,4 +209,5 @@ def uploadCourseUser(request):
 url_zzc = [
     url('createCourse', createCourse),
     url('uploadVideo', uploadVideo),
+    url('uploadCourseUser', uploadCourseUser),
 ]

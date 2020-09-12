@@ -16,10 +16,10 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from fire import views
+from fire import api_ztw
 from fire import api_jyh
 from fire import api_zzc
 from fire import api_ct
-
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),    
@@ -28,6 +28,7 @@ urlpatterns = [
     url(r'^test_find/', views.test_find),
 
 ]
+urlpatterns += api_ztw.url_ztw
 
 urlpatterns += api_jyh.url_jyh
 urlpatterns += api_zzc.url_zzc
