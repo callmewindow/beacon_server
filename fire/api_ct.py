@@ -3,7 +3,7 @@ from fire.models import *
 from django.http.response import HttpResponse
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
-
+from django.conf.urls import url
 
 def getPostInfo(request):
     if(request.method!='GET'):
@@ -32,6 +32,6 @@ def getPostInfo(request):
 
 
 url_ct = [
-	url('/getPostInfo',getPostInfo),
+	url('getPostInfo',getPostInfo),
 	
 	]

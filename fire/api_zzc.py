@@ -4,6 +4,7 @@ from django.http.response import HttpResponse
 import datetime
 from django.conf.urls import url
 
+
 def createCourse(request):
     if(request.method != 'POST'):
         msg = 'fail'
@@ -53,5 +54,5 @@ def createCourse(request):
     return HttpResponse(res)
 
 url_zzc = [
-    url('api/course/createCourse', course.createCourse),
+    url('api/course/createCourse', createCourse),
 ]
