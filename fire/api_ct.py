@@ -3,12 +3,16 @@ from fire.models import *
 from django.http.response import HttpResponse
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
+<<<<<<< HEAD
+from django.conf.urls import url
+=======
 from django.db.models import Max 
 from django.conf.urls import url
 from django.db.models import Q
 from itertools import chain
 import datetime
 
+>>>>>>> 72626f8a5d84e22dc9467f6fb04e33bb8fda0b71
 
 #获取帖子信息，包括帖子的"标题"、"发帖人"、"发帖时间"、"内容"、"点赞(like)数"，以及该帖子下的所有"回复"。回复包括每条回复的"内容"、"回复人"、"时间"
 # def getPostInfo(request):
@@ -128,8 +132,12 @@ def cicleAllPost(request):
 
 
 url_ct = [
+<<<<<<< HEAD
+	url('getPostInfo',getPostInfo),
+=======
 	#url('getPostInfo',getPostInfo),
     url('replyPost',replyPost),
     url('cicleAllPost',cicleAllPost),
+>>>>>>> 72626f8a5d84e22dc9467f6fb04e33bb8fda0b71
 	
 	]

@@ -6,6 +6,7 @@ import os
 from moviepy.editor import VideoFileClip
 from django.conf.urls import url
 
+
 def createCourse(request):
     if(request.method != 'POST'):
         msg = 'fail'
@@ -210,7 +211,11 @@ def uploadCourseUser(request):
 
 
 url_zzc = [
+<<<<<<< HEAD
+    url('api/course/createCourse', createCourse),
+=======
     url('createCourse', createCourse),
     url('uploadVideo', uploadVideo),
     url('uploadCourseUser', uploadCourseUser),
+>>>>>>> 72626f8a5d84e22dc9467f6fb04e33bb8fda0b71
 ]
