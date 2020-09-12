@@ -3,6 +3,10 @@ from fire.models import *
 from django.http.response import HttpResponse
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
+<<<<<<< HEAD
+=======
+from django.conf.urls import url
+>>>>>>> de795c83ea5865b7f75c935e341cb4e14ef52177
 from django.db.models import Max 
 from django.conf.urls import url
 from django.db.models import Q
@@ -96,6 +100,16 @@ def cicleAllPost(request):
         post_list = []
         for i in res:
             author_name = Userinfo.objects.filter(id=i.owner_id)[0].username
+            nickname = Userinfo.objects.filter(id=i.owner_id)[0].user_nickname
+            if nickname:
+                nickname = nickname
+            else:
+                nickname = 'null'
+            teacher_identity = Userinfo.objects.filter(id=i.owner_id)[0].teacher_identity
+            if teacher_identity:
+                teacher_identity = str(teacher_identity)
+            else:
+                teacher_identity = 'null'
             floor_1_res = Floor.objects.filter(Q(post_id=i.id) & Q(floor_num =1))
             datetime = floor_1_res[0].post_time
             content = floor_1_res[0].content
@@ -114,16 +128,14 @@ def cicleAllPost(request):
             for x in floor_list:
                 reply_num = reply_num+1
             reply_num = reply_num-1
-            
-
-                
-            content = {'id':str(i.id), 'title':i.title, 'author':author_name, 'datetime':str(datetime), 'content':content, 'read':str(watches), 'like':str(like_num), 'reply_num':reply_num ,'top':topped ,'highlight':stared}
+               
+            content = {'id':str(i.id), 'title':i.title, 'author':author_name, 'nickname':nickname, 'teacher_identity':teacher_identity, 'datetime':str(datetime), 'content':content, 'read':str(watches), 'like':str(like_num), 'reply_num':reply_num ,'top':topped ,'highlight':stared}
             post_list.append(content)
         #msg = "{\"msg\":\"ok\"" + "\"post_list\"" + "\""+ post_list+ "\"" +"}"\
         #res_dict = {'msg':'ok', 'post_list':post_list}
         return JsonResponse(post_list,safe=False)
     else:
-        return HttpResponse('该圈子id不存在') 
+        return HttpResponse('该圈子id不存在')
         
 
 
@@ -133,5 +145,8 @@ url_ct = [
 	#url('getPostInfo',getPostInfo),
     url('replyPost',replyPost),
     url('cicleAllPost',cicleAllPost),
+<<<<<<< HEAD
 	
+=======
+>>>>>>> de795c83ea5865b7f75c935e341cb4e14ef52177
 	]
