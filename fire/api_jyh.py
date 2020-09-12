@@ -45,10 +45,53 @@ def openCircle(request):
         return HttpResponse(res)
 
     #找到指定的课
-    course = Course.objects.get(id = class_id)
+    course = None
+
+    try:
+        course = Course.objects.get(id = class_id)
+    except Exception as e:
+        msg = '找不到指定课程'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+        
     #修改字段is_open
     if(course.is_open == 0):
         course.is_open = 1
+        course.save()
+    else:
+        msg = '课程状态异常,' + 'is_open值为' + str(course.is_open)
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+
+    msg = 'success'
+    res = '{"message":' + '"' + msg + '"' +'}'
+    return HttpResponse(res)
+
+def closeCircle(request):
+    if(request.method != 'GET'): 
+        msg = '需要GET请求'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    
+    class_id = request.GET.get("class_id", -1)
+    if(class_id == -1):
+        msg = '需要课程id'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+
+    #找到指定的课
+    course = None
+
+    try:
+        course = Course.objects.get(id = class_id)
+    except Exception as e:
+        msg = '找不到指定课程'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+
+    #修改字段is_open
+    if(course.is_open == 1):
+        course.is_open = 0
         course.save()
     else:
         msg = '课程状态异常,' + 'is_open值为' + str(course.is_open)
@@ -108,5 +151,6 @@ def getClassBasicInfo(request):
 url_jyh = [
     url(r'video/play/', getVideo),
     url(r'circle/open/', openCircle),
+    url(r'circle/close/', closeCircle),
     url(r'info/basic/class/', getClassBasicInfo),
 ]

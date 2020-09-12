@@ -3,7 +3,7 @@ from fire.models import *
 from django.http.response import HttpResponse
 import datetime
 import os
-from moviepy.editor import VideoFileClip
+# from moviepy.editor import VideoFileClip
 from django.conf.urls import url
 
 
@@ -25,23 +25,23 @@ def createCourse(request):
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
 
-    try:
-        result = Course.objects.filter(course_name=course_name)
-    except Exception:
-        msg = 'database search course_name in Course error'
-        res = "{\"msg\": \"" + msg + "\"}"
-        return HttpResponse(res)
-    if result:
-        msg = 'course_name exit'
-        res = "{\"msg\": \"" + msg + "\"}"
-        return HttpResponse(res)
+    # try:
+    #     result = Course.objects.filter(course_name=course_name)
+    # except Exception:
+    #     msg = 'database search course_name in Course error'
+    #     res = "{\"msg\": \"" + msg + "\"}"
+    #     return HttpResponse(res)
+    # if result:
+    #     msg = 'course_name exit'
+    #     res = "{\"msg\": \"" + msg + "\"}"
+    #     return HttpResponse(res)
 
     course=Course()
     course.course_name=course_name
     course.course_intro=course_intro
     course.rule=rule
-    course.start_time=datetime.datetime.strftime(start_time, '%Y-%m-%d %H:%M:%S')
-    course.end_time=datetime.datetime.strftime(end_time, '%Y-%m-%d %H:%M:%S')
+    course.start_time=datetime.datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+    course.end_time=datetime.datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
     course.profession=profession
     try:
         course.save()
@@ -50,11 +50,25 @@ def createCourse(request):
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
 
-    courseInDatabase=Course.objects.filter(course_name=course_name)
-    id=courseInDatabase.id
-    res = "{\"msg\": \"success\", \"id\": " + str(id) + "}"
+
+    # courseInDatabase=Course.objects.filter(course_name=course_name)
+    # id=courseInDatabase.id
+    # res = "{\"msg\": \"success\", \"id\": " + str(id) + "}"
+    # return HttpResponse(res)
+
+    msg = 'success'
+    res = "{\"msg\": \"" + msg + "\"}"
     return HttpResponse(res)
 
+    #courseInDatabase=Course.objects.filter(course_name=course_name)
+    #id=courseInDatabase[0].id
+    # res = "{\"msg\": \"success\", \"id\": " + str(id) + "}"
+    # return HttpResponse('res')
+
+
+    msg = 'success'
+    res = "{\"msg\": \"" + msg + "\"}"
+    return HttpResponse(res)
 
 
 def uploadVideo(request):
@@ -62,15 +76,27 @@ def uploadVideo(request):
         msg = 'fail'
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
+
+    # video_file = request.FILES.get('video')
+    # if video_file:
+    #     msg = 'success'
+    #     res = "{\"msg\": \"" + msg + "\"}"
+    #     return HttpResponse(res)
+    # else:
+    #     msg = 'fail'
+    #     res = "{\"msg\": \"" + msg + "\"}"
+    #     return HttpResponse(res)
+
     dict = request.POST
     title = dict.get('title')
     introduction = dict.get('introduction')
     # video_duration = dict.get('video_duration')
-    course_name = dict.get('course_name')
+    # course_name = dict.get('course_name')
+    course_id = dict.get('course_id')
     upload_time = dict.get('upload_time')
     video_file = request.FILES.get('video')
 
-    if title is None or introduction is None or course_name is None or upload_time is None or video_file is None:
+    if title is None or introduction is None or course_id is None or upload_time is None :
         msg = 'empty input'
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
@@ -89,10 +115,10 @@ def uploadVideo(request):
     video = Videos()
     video.title = title
     video.introduction = introduction
-    video.upload_time = datetime.datetime.strftime(upload_time, '%Y-%m-%d %H:%M:%S')
+    video.upload_time = datetime.datetime.strptime(upload_time, '%Y-%m-%d %H:%M:%S')
 
     try:
-        course = Course.objects.filter(course_name = course_name)
+        course = Course.objects.filter(id = course_id)
     except Exception:
         msg = 'database search course_name in Course error'
         res = "{\"msg\": \"" + msg + "\"}"
@@ -101,17 +127,17 @@ def uploadVideo(request):
         msg = 'course do not exit'
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
-    video.course = course
+    video.course_id = course_id
 
     video_name = title + '.mp4'
-    video_path = os.path.join('/fire/media', video_name)
+    video_path = os.path.join('/beacon/media', video_name)
     f = open(video_path, 'wb')
     for i in video_file.chunks():
         f.write(i)
     f.close()
-    video.local_address = '/fire/media/' + video_name
+    video.local_address = '/beacon/media/' + video_name
 
-    clip = VideoFileClip('/fire/media/' + video_name)
+    clip = VideoFileClip('/beacon/media/' + video_name)
     video.video_duration = clip
 
     try:
@@ -208,11 +234,11 @@ def uploadCourseUser(request):
 
 
 url_zzc = [
-<<<<<<< HEAD
-    url('api/course/createCourse', createCourse),
-=======
     url('createCourse', createCourse),
     url('uploadVideo', uploadVideo),
     url('uploadCourseUser', uploadCourseUser),
->>>>>>> 72626f8a5d84e22dc9467f6fb04e33bb8fda0b71
+<<<<<<< HEAD
+=======
+
+>>>>>>> de795c83ea5865b7f75c935e341cb4e14ef52177
 ]
