@@ -19,6 +19,7 @@ class Course(models.Model):
     end_time = models.DateTimeField(blank=True, null=True)
     profession = models.CharField(max_length=30, blank=True, null=True)
     is_open = models.IntegerField(default=0)
+    teacher_name = models.CharField(max_length=30, blank=True, null=True)
 
     class Meta:
         db_table = 'course'
@@ -53,7 +54,7 @@ class Post(models.Model):
 class UserCourse(models.Model):
     user = models.ForeignKey('Userinfo', models.DO_NOTHING, blank=True, null=True)
     course = models.ForeignKey(Course, models.DO_NOTHING, blank=True, null=True)
-    watch_duration = models.TimeField(blank=True, null=True)
+    watch_duration = models.IntegerField(blank=True, null=True)
     watch_num = models.IntegerField(blank=True, null=True)
     user_identity = models.IntegerField(blank=True, null=True)
     activity = models.IntegerField(blank=True, null=True)
@@ -65,7 +66,7 @@ class UserCourse(models.Model):
 #用户-播放记录
 class UserPlayRecords(models.Model):
     user_video = models.ForeignKey('UserVideo', models.DO_NOTHING)
-    played_time = models.TimeField(blank=True, null=True)
+    played_time = models.IntegerField(blank=True, null=True)
     start_play_time = models.DateTimeField(blank=True, null=True)
 
     class Meta:
@@ -75,7 +76,7 @@ class UserPlayRecords(models.Model):
 class UserVideo(models.Model):
     user = models.ForeignKey('Userinfo', models.DO_NOTHING, blank=True, null=True)
     video = models.ForeignKey('Videos', models.DO_NOTHING, blank=True, null=True)
-    video_viewed_time = models.TimeField(blank=True, null=True)
+    video_viewed_time = models.IntegerField(blank=True, null=True)
     video_viewed_times = models.IntegerField(blank=True, null=True)
 
     class Meta:
@@ -103,7 +104,7 @@ class Userinfo(models.Model):
 class Videos(models.Model):
     title = models.CharField(max_length=100, blank=True, null=True)
     introduction = models.TextField(blank=True, null=True)
-    video_duration = models.TimeField(blank=True, null=True)
+    video_duration = models.IntegerField(blank=True, null=True)
     local_address = models.CharField(max_length=100, blank=True, null=True)
     course = models.ForeignKey(Course, models.DO_NOTHING, blank=True, null=True)
     upload_time = models.DateTimeField(blank=True, null=True)
