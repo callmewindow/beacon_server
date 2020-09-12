@@ -165,7 +165,10 @@ def createPost(request):
 		floor.author = tag.owner
 		floor.post = tag
 		floor.content = dict.get('content',None)
-		floor.post_time = datetime.datetime.now(tz=gettz('Asia/Beijing'))
+		now = datetime.datetime.now(tz=gettz('Asia/Beijing'))
+		print(now)
+		print(now.strftime('%Y-%m-%d %H:%M:%S'))
+		floor.post_time = now
 		floor.floor_num = 1
 		floor.reply_floor = 0
 		floor.like_num = 0		
