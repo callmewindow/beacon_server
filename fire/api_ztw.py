@@ -4,13 +4,14 @@ from django.conf.urls import url
 from fire.models import *
 import traceback
 import datetime
+from dateutil.tz import gettz
 def json_raw(dict):
 	return str(dict).replace('\'','\"').replace('None','null')
 def model_to_dict_fixed(model):
 	d = model_to_dict(model)
 	for key in d.keys():
 		if d[key].__class__==datetime.datetime:
-			d[key] = str(d[key])
+			d[key] = d[key].strftime('%Y-%m-%d %H:%M:%S')
 	return d
 def api_format(request):
 	try:
@@ -145,6 +146,8 @@ def createPost(request):
 			return HttpResponse(json_raw(msg))
 		
 		tag.watches = 0
+		tag.stared = False
+		tag.topped = False
 		tag.tag = dict.get('tag',None)			
 		
 		if tag.title==None:
@@ -162,7 +165,7 @@ def createPost(request):
 		floor.author = tag.owner
 		floor.post = tag
 		floor.content = dict.get('content',None)
-		floor.post_time = datetime.datetime.now()
+		floor.post_time = datetime.datetime.now(tz=gettz('Asia/Beijing'))
 		floor.floor_num = 1
 		floor.reply_floor = 0
 		floor.like_num = 0		
@@ -189,13 +192,24 @@ def postQuery(request):
 			msg['result']='帖子id不能为空。'
 			return HttpResponse(json_raw(msg))
 		post = Post.objects.get(id=id)
-		print(post.title,post.id)
+		post.watches += 1
+		post.save()
+		msg['post']=model_to_dict_fixed(post)
+		owner = {}
+		owner['user_nickname']=post.owner.user_nickname
+		owner['teacher_identity']=post.owner.teacher_identity
+		msg['post']['owner']=owner
 		qset = Floor.objects.filter(post=post)
 		if not qset:
 			msg['result']='该帖子没有楼层，请联系后台。'
 			return HttpResponse(json_raw(msg))
 		for q in qset:
-			floors.append(model_to_dict_fixed(q))
+			qdict = model_to_dict_fixed(q)
+			owner = {}
+			owner['user_nickname']=q.author.user_nickname
+			owner['teacher_identity']=q.author.teacher_identity
+			qdict['owner']=owner
+			floors.append(qdict)
 		msg['floors']=floors
 		msg['result']='OK'
 		return HttpResponse(json_raw(msg))
