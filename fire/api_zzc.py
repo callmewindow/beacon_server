@@ -6,6 +6,7 @@ import os
 from moviepy.editor import VideoFileClip
 from django.conf.urls import url
 
+
 def createCourse(request):
     if(request.method != 'POST'):
         msg = 'fail'
@@ -49,6 +50,7 @@ def createCourse(request):
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
 
+
     # courseInDatabase=Course.objects.filter(course_name=course_name)
     # id=courseInDatabase.id
     # res = "{\"msg\": \"success\", \"id\": " + str(id) + "}"
@@ -58,6 +60,15 @@ def createCourse(request):
     res = "{\"msg\": \"" + msg + "\"}"
     return HttpResponse(res)
 
+    #courseInDatabase=Course.objects.filter(course_name=course_name)
+    #id=courseInDatabase[0].id
+    # res = "{\"msg\": \"success\", \"id\": " + str(id) + "}"
+    # return HttpResponse('res')
+
+
+    msg = 'success'
+    res = "{\"msg\": \"" + msg + "\"}"
+    return HttpResponse(res)
 
 
 def uploadVideo(request):
@@ -226,4 +237,5 @@ url_zzc = [
     url('createCourse', createCourse),
     url('uploadVideo', uploadVideo),
     url('uploadCourseUser', uploadCourseUser),
+
 ]

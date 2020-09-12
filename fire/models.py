@@ -18,6 +18,7 @@ class Course(models.Model):
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
     profession = models.CharField(max_length=30, blank=True, null=True)
+    is_open = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'course'
@@ -115,3 +116,6 @@ class LikeRecord(models.Model):
     student = models.ForeignKey('Userinfo', models.DO_NOTHING, blank=True, null=True)
     floor = models.ForeignKey('Floor', models.DO_NOTHING, blank=True, null=True)
     like_type = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'likerecord'
