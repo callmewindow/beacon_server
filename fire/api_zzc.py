@@ -6,7 +6,7 @@ from fire.models import *
 from django.http.response import HttpResponse
 import datetime
 import os
-from moviepy.editor import VideoFileClip
+# from moviepy.editor import VideoFileClip
 from django.conf.urls import url
 
 
@@ -400,6 +400,8 @@ url_zzc = [
     url('createCourse', createCourse),
     # url('uploadVideo', uploadVideo),
     url('uploadCourseUser', uploadCourseUser),
+
     url('uploadVideo1', uploadVideo1),
     url('uploadVideo2', uploadVideo2),
+
 ]

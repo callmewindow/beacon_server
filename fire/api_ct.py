@@ -3,7 +3,10 @@ from fire.models import *
 from django.http.response import HttpResponse
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
+<<<<<<< HEAD
+=======
 from django.conf.urls import url
+>>>>>>> de795c83ea5865b7f75c935e341cb4e14ef52177
 from django.db.models import Max 
 from django.conf.urls import url
 from django.db.models import Q
@@ -142,4 +145,8 @@ url_ct = [
 	#url('getPostInfo',getPostInfo),
     url('replyPost',replyPost),
     url('cicleAllPost',cicleAllPost),
+<<<<<<< HEAD
+	
+=======
+>>>>>>> de795c83ea5865b7f75c935e341cb4e14ef52177
 	]
