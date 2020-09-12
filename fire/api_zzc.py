@@ -39,8 +39,8 @@ def createCourse(request):
     course.course_name=course_name
     course.course_intro=course_intro
     course.rule=rule
-    course.start_time=datetime.datetime.strftime(start_time, '%Y-%m-%d %H:%M:%S')
-    course.end_time=datetime.datetime.strftime(end_time, '%Y-%m-%d %H:%M:%S')
+    course.start_time=datetime.datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+    course.end_time=datetime.datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
     course.profession=profession
     try:
         course.save()
@@ -49,11 +49,14 @@ def createCourse(request):
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
 
-    courseInDatabase=Course.objects.filter(course_name=course_name)
-    id=courseInDatabase.id
-    res = "{\"msg\": \"success\", \"id\": " + str(id) + "}"
-    return HttpResponse(res)
+    #courseInDatabase=Course.objects.filter(course_name=course_name)
+    #id=courseInDatabase[0].id
+    # res = "{\"msg\": \"success\", \"id\": " + str(id) + "}"
+    # return HttpResponse('res')
 
+    msg = 'success'
+    res = "{\"msg\": \"" + msg + "\"}"
+    return HttpResponse(res)
 
 
 def uploadVideo(request):
@@ -88,7 +91,7 @@ def uploadVideo(request):
     video = Videos()
     video.title = title
     video.introduction = introduction
-    video.upload_time = datetime.datetime.strftime(upload_time, '%Y-%m-%d %H:%M:%S')
+    video.upload_time = datetime.datetime.strptime(upload_time, '%Y-%m-%d %H:%M:%S')
 
     try:
         course = Course.objects.filter(course_name = course_name)

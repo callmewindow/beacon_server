@@ -114,16 +114,14 @@ def cicleAllPost(request):
             for x in floor_list:
                 reply_num = reply_num+1
             reply_num = reply_num-1
-            
-
-                
+               
             content = {'id':str(i.id), 'title':i.title, 'author':author_name, 'datetime':str(datetime), 'content':content, 'read':str(watches), 'like':str(like_num), 'reply_num':reply_num ,'top':topped ,'highlight':stared}
             post_list.append(content)
         #msg = "{\"msg\":\"ok\"" + "\"post_list\"" + "\""+ post_list+ "\"" +"}"\
         #res_dict = {'msg':'ok', 'post_list':post_list}
         return JsonResponse(post_list,safe=False)
     else:
-        return HttpResponse('该圈子id不存在') 
+        return HttpResponse('该圈子id不存在')
         
 
 
