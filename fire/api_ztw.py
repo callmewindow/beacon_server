@@ -120,9 +120,100 @@ def courseQuery(request):
 		traceback.print_exc()
 		msg['result']='Unexpected Error'
 		return HttpResponse(json_raw(msg))
+def createPost(request):
+	try:
+		msg={}
+		dict = request.POST
+		
+		tag = Post()
+		tag.title = dict.get('title',None)
+		
+		course = dict.get('course',None)
+		tag_courses = Course.objects.filter(id=course)		
+		if tag_courses:
+			tag.course = tag_courses.first()
+		else:
+			msg['result']='该课程id不存在。'
+			return HttpResponse(json_raw(msg))
+		
+		owner = dict.get('owner',None)
+		tag_owners = Userinfo.objects.filter(id=owner)
+		if tag_owners:
+			tag.owner = tag_owners.first()
+		else:
+			msg['result']='该帖子所有者id不存在。'
+			return HttpResponse(json_raw(msg))
+		
+		tag.watches = 0
+		tag.tag = dict.get('tag',None)			
+		
+		if tag.title==None:
+			msg['result']='标题不能为空。'
+			return HttpResponse(json_raw(msg))
+		elif tag.course==None:
+			msg['result']='所属课程不能为空。'
+			return HttpResponse(json_raw(msg))
+		elif tag.title==None:
+			msg['owner']='帖子所有者不能为空。'
+			return HttpResponse(json_raw(msg))
+		tag.save()
+		
+		floor = Floor()
+		floor.author = tag.owner
+		floor.post = tag
+		floor.content = dict.get('content',None)
+		floor.post_time = datetime.datetime.now()
+		floor.floor_num = 1
+		floor.reply_floor = 0
+		floor.like_num = 0		
+		floor.save()
+		
+
+		
+		msg['id']=tag.id
+		msg['result']='帖子创建成功'
+		return HttpResponse(json_raw(msg))
+		
+		
+	except:
+		traceback.print_exc()
+		msg['result']='Unexpected Error'
+		return HttpResponse(json_raw(msg))
+def postQuery(request):
+	try:
+		dict = request.POST
+		msg = {}
+		floors = []
+		id = dict.get('id',None)
+		if id==None:
+			msg['result']='帖子id不能为空。'
+			return HttpResponse(json_raw(msg))
+		post = Post.objects.get(id=id)
+		print(post.title,post.id)
+		qset = Floor.objects.filter(post=post)
+		if not qset:
+			msg['result']='该帖子没有楼层，请联系后台。'
+			return HttpResponse(json_raw(msg))
+		for q in qset:
+			floors.append(model_to_dict_fixed(q))
+		msg['floors']=floors
+		msg['result']='OK'
+		return HttpResponse(json_raw(msg))
+		
+		
+	except:
+		traceback.print_exc()
+		msg['result']='Unexpected Error'
+		return HttpResponse(json_raw(msg))	
+	
+	
+	
+
 url_ztw = [
 	url('addUser',addUser),
 	url('setCourseRule',setCourseRule),
 	url('login',login),
-	url('courseQuery',courseQuery)
+	url('courseQuery',courseQuery),
+	url('createPost',createPost),
+	url('postQuery',postQuery)
 	]
