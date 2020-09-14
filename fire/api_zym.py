@@ -2,6 +2,7 @@ from django.http.response import HttpResponse
 from django.forms.models import model_to_dict
 from django.conf.urls import url
 from fire.models import *
+from django.http import JsonResponse
 import traceback
 import datetime
 def json_raw(dict):
@@ -16,12 +17,12 @@ def api_format(request):
 	try:
 		dict = request.POST
 		msg = {}
-		
-		
+
 	except:
 		traceback.print_exc()
 		msg['message']='Unexpected Error'
-		return HttpResponse(json_raw(msg))
+		return JsonResponse(msg, safe=False)
+
 def get_course_by_userid(request):
 	try:
 		dict = request.GET
@@ -30,19 +31,19 @@ def get_course_by_userid(request):
 		userid = dict.get('userid', None)
 		if userid == None:
 			msg['message'] = '用户id不能为空。'
-			return HttpResponse(json_raw(msg))
+			return JsonResponse(msg, safe=False)
 
 		courses = []
 		result = UserCourse.objects.filter(user=userid)
 		if len(result) == 0:
 			msg['message'] = '该用户未参加任何课程。'
-			return HttpResponse(json_raw(msg))
+			return JsonResponse(msg, safe=False)
 		for i in result:
 			model = model_to_dict_fixed(i)
 			course_model = Course.objects.filter(id=model['course'])
 			if len(course_model) is 0:
 				msg['message'] = '未找到课程。'
-				return HttpResponse(json_raw(msg))
+				return JsonResponse(msg, safe=False)
 			else:
 				course_dict = model_to_dict(course_model.first())
 				course_name = course_dict.get('course_name', None)
@@ -62,11 +63,11 @@ def get_course_by_userid(request):
 				courses.append(course)
 
 		msg['courses'] = courses
-		return HttpResponse(json_raw(msg))
+		return JsonResponse(msg, safe=False)
 	except:
 		traceback.print_exc()
 		msg['message'] = 'Unexpected Error'
-		return HttpResponse(json_raw(msg))
+		return JsonResponse(msg, safe=False)
 
 def get_userinfo_by_userid(request):
 	try:
@@ -75,8 +76,8 @@ def get_userinfo_by_userid(request):
 		msg['message'] = ''
 		userid = dict.get('userid', None)
 		if userid == None:
-			msg['result'] = '用户id不能为空。'
-			return HttpResponse(json_raw(msg))
+			msg['message'] = '用户id不能为空。'
+			return JsonResponse(msg, safe=False)
 
 		userinfo = Userinfo.objects.filter(id=userid).first()
 		if userinfo:
@@ -108,19 +109,19 @@ def get_userinfo_by_userid(request):
 				"phonenum": user_dict.get('phonenumber', None),
 				"email": user_dict.get('email', None),
 				"realname": user_dict.get('realname', None),
-			},
+			}
 			msg['message'] = 'OK'
 			msg['user'] = user
-			return HttpResponse(json_raw(msg))
+			return JsonResponse(msg, safe=False)
 		else:
-			msg['result'] = '用户不存在。'
-			return HttpResponse(json_raw(msg))
+			msg['message'] = '用户不存在。'
+			return JsonResponse(msg, safe=False)
 
 
 	except:
 		traceback.print_exc()
-		msg['result']='Unexpected Error'
-		return HttpResponse(json_raw(msg))
+		msg['message'] = 'Unexpected Error'
+		return JsonResponse(msg, safe=False)
 
 url_zym = [
 	url('usercourse',get_course_by_userid),
