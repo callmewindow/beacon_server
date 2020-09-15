@@ -130,8 +130,8 @@ def cicleAllPost(request):
             content = floor_1_res[0].content
             watches = i.watches
             like_num = floor_1_res[0].like_num
-            topped = str(i.topped)
-            stared = str(i.stared)
+            topped = i.topped
+            stared = i.stared
             floor_list = Floor.objects.filter(post_id=i.id)
             reply_num = 0
             for x in floor_list:
@@ -294,14 +294,8 @@ def searchPost(request):
             content = floor_1_res[0].content
             watches = i.watches
             like_num = floor_1_res[0].like_num
-            if i.topped:
-                topped = str(i.topped)
-            else:
-                topped = 'null'
-            if i.stared:
-                stared = str(i.stared)
-            else:
-                stared = 'null'
+            topped = i.topped
+            stared = i.stared
             floor_list = Floor.objects.filter(post_id=i.id)
             reply_num = 0
             for x in floor_list:
