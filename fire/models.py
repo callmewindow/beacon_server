@@ -30,8 +30,8 @@ class Floor(models.Model):
 #帖子
 class Post(models.Model):
     title = models.CharField(max_length=100)
-    stared = models.IntegerField(blank=True, null=True)
-    topped = models.IntegerField(blank=True, null=True)
+    stared = models.IntegerField(blank=True, default=0)
+    topped = models.IntegerField(blank=True, default=0)
     course = models.ForeignKey(Course, models.DO_NOTHING)
     owner = models.ForeignKey('Userinfo', models.DO_NOTHING)
     watches = models.IntegerField()
