@@ -47,6 +47,9 @@ def addUser(request):
 		elif Userinfo.objects.filter(username=tag.username):
 			msg['result'] = '该用户名已被注册。'
 			return HttpResponse(json_raw(msg))
+		elif Userinfo.objects.filter(email=tag.email):
+			msg['result'] = '该邮箱已被注册。'
+			return HttpResponse(json_raw(msg))
 			
 		msg['result']='OK'
 		tag.save()
@@ -222,15 +225,195 @@ def postQuery(request):
 		traceback.print_exc()
 		msg['result']='Unexpected Error'
 		return HttpResponse(json_raw(msg))	
-	
-	
-	
+def getPoint(request):
+	try:
+		dict = request.POST
+		msg = {}
+		
+		point = dict.get('point')
+		if point == None:
+			msg['result']='积分不能为空。'
+			return HttpResponse(json_raw(msg))
+		
+		user_id = dict.get('user_id')
+		if user_id == None:
+			msg['result']='用户id不能为空。'
+			return HttpResponse(json_raw(msg))
+		course_id = dict.get('course_id')
+		if course_id == None:
+			msg['result']='课程id不能为空。'
+			return HttpResponse(json_raw(msg))
+		user = Userinfo.objects.filter(id=user_id)
+		if not user:
+			msg['result']='用户不存在。'
+			return HttpResponse(json_raw(msg))
+		course = Course.objects.filter(id=course_id)
+		if not course:
+			msg['result']='课程不存在。'
+			return HttpResponse(json_raw(msg))
+		
+		
+		user_course = UserCourse.objects.get(user=user,course=course)
+		if not user_course:
+			msg['result']='该用户未选择此课程。'
+			return HttpResponse(json_raw(msg))
+		user_course.point += int(point)
+		
+		if user_course.point<0:
+			msg['result']='积分不足，无法扣除。'
+			return HttpResponse(json_raw(msg))
+		user_course.save()
+		msg['result']='OK'
+		return HttpResponse(json_raw(msg))
+		
+		
+	except:
+		traceback.print_exc()
+		msg['result']='Unexpected Error'
+		return HttpResponse(json_raw(msg))
+def userCourse(request):
+	try:
+		dict = request.POST
+		msg = {}
+		
+		user_id = dict.get('user_id')
+		course_id = dict.get('course_id')
+		if not user_id:
+			msg['result']='用户id不能为空。'
+			return HttpResponse(json_raw(msg))
+		if not course_id:
+			msg['result']='课程id不能为空。'
+		users = Userinfo.objects.filter(id=user_id)
+		courses = Course.objects.filter(id=course_id)
+		if not user:
+			msg['result']='该用户不存在。'
+			return HttpResponse(json_raw(msg))
+		if not course:
+			msg['result']='该课程不存在。'
+			return HttpResponse(json_raw(msg))
+		user = users.first()
+		course = courses.first()
+		
+		user_courses = UserCourse.objects.filter(user=user,course=course)
+		
+		if not user_courses:
+			msg['result']='该用户未选择此课程。'
+			return HttpResponse(json_raw(msg))
+		user_course = user_courses.first()
+		msg['result']='OK'
+		msg['user_course']=model_to_dict_fixed(user_course)
+		return HttpResponse(json_raw(msg))
+		
+	except:
+		traceback.print_exc()
+		msg['result']='Unexpected Error'
+		return HttpResponse(json_raw(msg))
+def getCourseWatches(request):
+	try:
+		dict = request.POST
+		msg = {}
+		
+		id = dict.get('id')
+		if not id:
+			msg['result']='课程id不能为空。'
+			return HttpResponse(json_raw(msg))
+		courses = Course.objects.filter(id=id)
+		if not courses:
+			msg['result']='该课程不存在。'
+			return HttpResponse(json_raw(msg))
+		course = courses.first()
+		videos = Videos.objects.filter(course=course)
+		user_videos = []
+		for video in videos:
+			video_user_videos = UserVideo.objects.filter(video=video)
+			for v in video_user_videos:
+				user_videos.append(model_to_dict_fixed(v))
+		msg['result']='OK'
+		msg['user_videos']=user_videos
+		return HttpResponse(json_raw(msg))
+	except:
+		traceback.print_exc()
+		msg['result']='Unexpected Error'
+		return HttpResponse(json_raw(msg))
+def oneWatch(request):
+	try:
+		dict = request.POST
+		msg = {}
+		video_id = dict.get('video_id')
+		user_id = dict.get('user_id')
+		played_time = dict.get('played_time')
+		start_play_time = dict.get('start_play_time')
+		
+		if (not video_id) or (not user_id) or (not played_time) or (not start_play_time):
+			msg['result']='请求字段错误，请重试。'
+			return HttpResponse(json_raw(msg))
+		
+		users = Userinfo.objects.filter(id=user_id)
+		if not users:
+			msg['result']='该用户不存在。'
+			return HttpResponse(json_raw(msg))
+		user = users.first()
+		
+		videos = Videos.objects.filter(id=video_id)
+		if not videos:
+			msg['result']='该视频不存在。'
+			return HttpResponse(json_raw(msg))
+		video = videos.first()
+		
+		course = video.course
+		user_courses = UserCourse.objects.filter(course=course,user=user)
+		if not user_courses:
+			msg['result']='该用户未选该视频对应的课程。'
+			return HttpResponse(json_raw(msg))
+		#若游客或未选课学生观看视频，不计入课程的观看时长
+		
+		user_videos = UserVideo.objects.filter(user=user,video=video)
+		user_video = None
+		if not user_videos:
+			user_video = UserVideo()
+			user_video.user = user
+			user_video.video = video
+			user_video.video_viewed_time = 1
+			user_video.video_viewed_times = int(played_time)
+			user_video.save()
+		else:
+			user_video = user_videos.first()
+			user_video.video_viewed_time += 1
+			user_video.video_viewed_times += int(played_time)
+			user_video.save()
+		user_play_record = UserPlayRecords()
+		user_play_record.user_video = user_video
+		user_play_record.played_time = int(played_time)
+		user_play_record.start_play_time = start_play_time
+		user_play_record.save()
+		
 
+		user_course = user_courses.first()
+		user_course.watch_duration += int(played_time)
+		user_course.watch_num += 1
+		user_course.save()
+		msg['result']='OK'
+		return HttpResponse(json_raw(msg))
+		
+		
+		
+			
+		
+		
+		
+	except:
+		traceback.print_exc()
+		msg['result']='Unexpected Error'
+		return HttpResponse(json_raw(msg))
 url_ztw = [
 	url('addUser',addUser),
 	url('setCourseRule',setCourseRule),
 	url('login',login),
 	url('courseQuery',courseQuery),
 	url('createPost',createPost),
-	url('postQuery',postQuery)
+	url('postQuery',postQuery),
+	url('getPoint',getPoint),
+	url('userCourse',userCourse),
+	url('getCourseWatches',getCourseWatches),
+	url('oneWatch',oneWatch)
 	]
