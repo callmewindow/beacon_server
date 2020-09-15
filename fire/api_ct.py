@@ -176,6 +176,21 @@ def topPost(request):
     else:
         return HttpResponse('该帖子id不存在')
 
+#取消置顶帖子
+def cancelTopPost(request):
+    if(request.method!='POST'):
+        return None
+    dict = request.POST
+    post_id = dict.get('postId')
+    res = Post.objects.filter(id=post_id)
+    if res:
+        topped = Post.objects.filter(id=post_id).update(topped=0)
+        msg = "ok"
+        msg2 = "{\"msg\": \"" + msg + "\"}"
+        return HttpResponse(msg2) 
+    else:
+        return HttpResponse('该帖子id不存在')
+
 
 #加精帖子
 def starPost(request):
@@ -193,10 +208,28 @@ def starPost(request):
         return HttpResponse('该帖子id不存在')
 
 
+#取消加精帖子
+def cancelStarPost(request):
+    if(request.method!='POST'):
+        return None
+    dict = request.POST
+    post_id = dict.get('postId')
+    res = Post.objects.filter(id=post_id)
+    if res:
+        topped = Post.objects.filter(id=post_id).update(stared=0)
+        msg = "ok"
+        msg2 = "{\"msg\": \"" + msg + "\"}"
+        return HttpResponse(msg2) 
+    else:
+        return HttpResponse('该帖子id不存在')
+
+
 url_ct = [
 	#url('getPostInfo',getPostInfo),
     url('replyPost',replyPost),
     url('cicleAllPost',cicleAllPost),
     url('topPost',topPost),
     url('starPost',starPost),
+    url('cancelTopPost',cancelTopPost),
+    url('cancelStarPost',cancelStarPost),
 	]
