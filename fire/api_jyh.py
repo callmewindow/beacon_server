@@ -53,7 +53,7 @@ def openCircle(request):
         msg = '找不到指定课程'
         res = '{"message":' + '"' + msg + '"' +'}'
         return HttpResponse(res)
-        
+
     #修改字段is_open
     if(course.is_open == 0):
         course.is_open = 1
@@ -133,6 +133,9 @@ def getClassBasicInfo(request):
     profession = course.profession
     is_open = course.is_open
 
+    #还要找哪里有观看人数
+    person_number = len(UserCourse.objects.filter(course_id = class_id))
+
     course_info = {}
     course_info["course_name"] = course.course_name
     course_info["course_intro"] = course.course_intro
@@ -141,6 +144,7 @@ def getClassBasicInfo(request):
     course_info["end_time"] = course.end_time
     course_info["profession"] = course.profession
     course_info["is_open"] = course.is_open    
+    course_info["person_number"] = person_number
 
     send = {}
     send["course"] = course_info
