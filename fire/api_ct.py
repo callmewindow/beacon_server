@@ -87,6 +87,7 @@ def replyPost(request):
         msg2 = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(msg2) 
 
+
 #显示圈子下的所有帖子
 def cicleAllPost(request):
     if(request.method!='POST'):
@@ -111,8 +112,6 @@ def cicleAllPost(request):
             floor_1_res = Floor.objects.filter(Q(post_id=i.id) & Q(floor_num =1))
 
 
-
-
             floor_res = Floor.objects.filter(post_id=i.id)
             tmp_list = []
             for x in floor_res:
@@ -125,8 +124,6 @@ def cicleAllPost(request):
                 tmp = {'last_time':last_time,'last_name':last_name}
                 tmp_list.append(tmp)
             tmp_list.sort(key=operator.itemgetter('last_time'),reverse=True)
-
-
 
 
             datetime = floor_1_res[0].post_time
@@ -157,10 +154,6 @@ def cicleAllPost(request):
         return JsonResponse([],safe=False)
         
 
-#检索课程
-
-#检索帖子
-
 #置顶帖子
 def topPost(request):
     if(request.method!='POST'):
@@ -175,6 +168,7 @@ def topPost(request):
         return HttpResponse(msg2) 
     else:
         return HttpResponse('该帖子id不存在')
+
 
 #取消置顶帖子
 def cancelTopPost(request):
@@ -224,6 +218,113 @@ def cancelStarPost(request):
         return HttpResponse('该帖子id不存在')
 
 
+#搜索课程（根据课程标题及简介模糊搜索）
+def searchCourse(request):
+    if(request.method!='POST'):
+        return None
+    dict = request.POST
+    keyWord = dict.get('keyWord')
+    res = Course.objects.filter(Q(course_name__contains=keyWord) | Q(course_intro__contains =keyWord))
+    if res:
+        course_list = []
+        for i in res:
+            course_id = str(i.id)
+            course_name = i.course_name
+            course_intro = i.course_intro
+            if not course_intro:
+                course_intro = 'null'
+            start_time = str(i.start_time)
+            if not start_time:
+                start_time = 'null'
+            end_time = str(i.end_time)
+            if not end_time:
+                end_time = 'null'
+            profession = i.profession
+            if not profession:
+                profession = 'null'
+            rule = i.rule
+            if not rule:
+                rule = 'null'
+            teacher_id = i.teacher_id_id
+            if not teacher_id:
+                teacher_name='null'
+            else:
+                teacher_name = Userinfo.objects.filter(id=teacher_id)[0].realname
+            content = {'id':course_id, 'course_name':course_name, 'course_intro':course_intro, 'start_time':start_time, 'end_time':end_time, 'profession':profession, 'rule':rule, 'teacher_name':teacher_name}
+            course_list.append(content)
+        return JsonResponse(course_list,safe=False)
+    else:
+        return JsonResponse([],safe=False)
+
+
+#搜索帖子（根据帖子标题搜索）
+def searchPost(request):   
+    if(request.method!='POST'):
+        return None
+    dict = request.POST
+    keyWord = dict.get('keyWord')
+    res = Post.objects.filter(title__contains=keyWord)
+    if res:
+        post_list = []
+        for i in res:
+            author_name = Userinfo.objects.filter(id=i.owner_id)[0].username
+            nickname = Userinfo.objects.filter(id=i.owner_id)[0].user_nickname
+            if nickname:
+                nickname = nickname
+            else:
+                nickname = 'null'
+            teacher_identity = Userinfo.objects.filter(id=i.owner_id)[0].teacher_identity
+            if teacher_identity:
+                teacher_identity = str(teacher_identity)
+            else:
+                teacher_identity = 'null'
+            floor_1_res = Floor.objects.filter(Q(post_id=i.id) & Q(floor_num =1))
+
+
+            floor_res = Floor.objects.filter(post_id=i.id)
+            tmp_list = []
+            for x in floor_res:
+                last_time = str(x.post_time)
+                last_name = Userinfo.objects.filter(id=x.author_id)[0].user_nickname
+                if last_name:
+                    last_name = last_name
+                else:
+                    last_name = 'null'
+                tmp = {'last_time':last_time,'last_name':last_name}
+                tmp_list.append(tmp)
+            tmp_list.sort(key=operator.itemgetter('last_time'),reverse=True)
+
+
+            datetime = floor_1_res[0].post_time
+            content = floor_1_res[0].content
+            watches = i.watches
+            like_num = floor_1_res[0].like_num
+            if i.topped:
+                topped = str(i.topped)
+            else:
+                topped = 'null'
+            if i.stared:
+                stared = str(i.stared)
+            else:
+                stared = 'null'
+            floor_list = Floor.objects.filter(post_id=i.id)
+            reply_num = 0
+            for x in floor_list:
+                reply_num = reply_num+1
+            reply_num = reply_num-1
+               
+            content = {'id':str(i.id), 'title':i.title, 'author':author_name, 'nickname':nickname, 'teacher_identity':teacher_identity, 'datetime':str(datetime), 'content':content, 'read':str(watches), 'like':str(like_num), 'reply_num':reply_num ,'top':topped ,'highlight':stared,'last_time':tmp_list[0]['last_time'], 'last_name':tmp_list[0]['last_name']}
+            post_list.append(content)
+        post_list.sort(key=operator.itemgetter('last_time'),reverse=True)
+        #msg = "{\"msg\":\"ok\"" + "\"post_list\"" + "\""+ post_list+ "\"" +"}"\
+        #res_dict = {'msg':'ok', 'post_list':post_list}
+        return JsonResponse(post_list,safe=False)
+    else:
+        return JsonResponse([],safe=False)
+
+
+
+
 url_ct = [
 	#url('getPostInfo',getPostInfo),
     url('replyPost',replyPost),
@@ -232,4 +333,6 @@ url_ct = [
     url('starPost',starPost),
     url('cancelTopPost',cancelTopPost),
     url('cancelStarPost',cancelStarPost),
+    url('searchPost',searchPost),
+    url('searchCourse',searchCourse),
 	]
