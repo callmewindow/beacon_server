@@ -263,7 +263,8 @@ def searchPost(request):
         return None
     dict = request.POST
     keyWord = dict.get('keyWord')
-    res = Post.objects.filter(title__contains=keyWord)
+    forumId = dict.get('forumId')
+    res = Post.objects.filter(Q(title__contains=keyWord) & Q(course_id=forumId))
     if res:
         post_list = []
         for i in res:
