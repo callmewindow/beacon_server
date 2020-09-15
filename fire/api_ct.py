@@ -3,15 +3,13 @@ from fire.models import *
 from django.http.response import HttpResponse
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
-<<<<<<< HEAD
-=======
 from django.conf.urls import url
->>>>>>> de795c83ea5865b7f75c935e341cb4e14ef52177
 from django.db.models import Max 
 from django.conf.urls import url
 from django.db.models import Q
 from itertools import chain
 import datetime
+import operator
 
 
 #获取帖子信息，包括帖子的"标题"、"发帖人"、"发帖时间"、"内容"、"点赞(like)数"，以及该帖子下的所有"回复"。回复包括每条回复的"内容"、"回复人"、"时间"
@@ -111,6 +109,26 @@ def cicleAllPost(request):
             else:
                 teacher_identity = 'null'
             floor_1_res = Floor.objects.filter(Q(post_id=i.id) & Q(floor_num =1))
+
+
+
+
+            floor_res = Floor.objects.filter(post_id=i.id)
+            tmp_list = []
+            for x in floor_res:
+                last_time = str(x.post_time)
+                last_name = Userinfo.objects.filter(id=x.author_id)[0].user_nickname
+                if last_name:
+                    last_name = last_name
+                else:
+                    last_name = 'null'
+                tmp = {'last_time':last_time,'last_name':last_name}
+                tmp_list.append(tmp)
+            tmp_list.sort(key=operator.itemgetter('last_time'),reverse=True)
+
+
+
+
             datetime = floor_1_res[0].post_time
             content = floor_1_res[0].content
             watches = i.watches
@@ -129,24 +147,56 @@ def cicleAllPost(request):
                 reply_num = reply_num+1
             reply_num = reply_num-1
                
-            content = {'id':str(i.id), 'title':i.title, 'author':author_name, 'nickname':nickname, 'teacher_identity':teacher_identity, 'datetime':str(datetime), 'content':content, 'read':str(watches), 'like':str(like_num), 'reply_num':reply_num ,'top':topped ,'highlight':stared}
+            content = {'id':str(i.id), 'title':i.title, 'author':author_name, 'nickname':nickname, 'teacher_identity':teacher_identity, 'datetime':str(datetime), 'content':content, 'read':str(watches), 'like':str(like_num), 'reply_num':reply_num ,'top':topped ,'highlight':stared,'last_time':tmp_list[0]['last_time'], 'last_name':tmp_list[0]['last_name']}
             post_list.append(content)
+        post_list.sort(key=operator.itemgetter('last_time'),reverse=True)
         #msg = "{\"msg\":\"ok\"" + "\"post_list\"" + "\""+ post_list+ "\"" +"}"\
         #res_dict = {'msg':'ok', 'post_list':post_list}
         return JsonResponse(post_list,safe=False)
     else:
-        return HttpResponse('该圈子id不存在')
+        return JsonResponse([],safe=False)
         
 
+#检索课程
 
+#检索帖子
+
+#置顶帖子
+def topPost(request):
+    if(request.method!='POST'):
+        return None
+    dict = request.POST
+    post_id = dict.get('postId')
+    res = Post.objects.filter(id=post_id)
+    if res:
+        topped = Post.objects.filter(id=post_id).update(topped=1)
+        msg = "ok"
+        msg2 = "{\"msg\": \"" + msg + "\"}"
+        return HttpResponse(msg2) 
+    else:
+        return HttpResponse('该帖子id不存在')
+
+
+#加精帖子
+def starPost(request):
+    if(request.method!='POST'):
+        return None
+    dict = request.POST
+    post_id = dict.get('postId')
+    res = Post.objects.filter(id=post_id)
+    if res:
+        topped = Post.objects.filter(id=post_id).update(stared=1)
+        msg = "ok"
+        msg2 = "{\"msg\": \"" + msg + "\"}"
+        return HttpResponse(msg2) 
+    else:
+        return HttpResponse('该帖子id不存在')
 
 
 url_ct = [
 	#url('getPostInfo',getPostInfo),
     url('replyPost',replyPost),
     url('cicleAllPost',cicleAllPost),
-<<<<<<< HEAD
-	
-=======
->>>>>>> de795c83ea5865b7f75c935e341cb4e14ef52177
+    url('topPost',topPost),
+    url('starPost',starPost),
 	]
