@@ -9,14 +9,14 @@ class Course(models.Model):
     end_time = models.DateTimeField(blank=True, null=True)
     profession = models.CharField(max_length=30, blank=True, null=True)
     is_open = models.IntegerField(default=0)
-    teacher_name = models.CharField(max_length=30, blank=True, null=True)
+    teacher_id = models.ForeignKey('Userinfo', models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         db_table = 'course'
 
 #楼层
 class Floor(models.Model):
-    author = models.ForeignKey('Userinfo', models.DO_NOTHING)
+    author = models.ForeignKey('Userinfo', models.DO_NOTHING, blank=True, null=True)
     post = models.ForeignKey('Post', models.DO_NOTHING)
     content = models.TextField(blank=True, null=True)
     post_time = models.DateTimeField(blank=True, null=True)

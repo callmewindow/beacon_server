@@ -1,5 +1,5 @@
 import json
-from builtins import type, eval
+from builtins import type, eval, Exception, range
 
 from django.shortcuts import render
 from fire.models import *
@@ -8,6 +8,8 @@ import datetime
 import os
 from moviepy.editor import VideoFileClip
 from django.conf.urls import url
+import xlrd
+import xlwt
 
 
 def createCourse(request):
@@ -63,9 +65,6 @@ def createCourse(request):
     course.end_time=datetime.datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
     course.profession=profession
 
-
-
-
     try:
         course.save()
     except Exception:
@@ -73,14 +72,7 @@ def createCourse(request):
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
 
-
-    # courseInDatabase=Course.objects.filter(course_name=course_name)
-    # id=courseInDatabase.id
-    # res = "{\"msg\": \"success\", \"id\": " + str(id) + "}"
-    # return HttpResponse(res)
-
     msg = 'success'
-    # res = "{\"msg\": \"" + course_name + " " + course_intro + " " + start_time + " " + end_time + " " + profession + "\"}"
     res = "{\"msg\": \"" + msg + "\"}"
     return HttpResponse(res)
 
@@ -202,7 +194,6 @@ def uploadVideo1(request):
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
 
-
     video = Videos()
     #
     # try:
@@ -216,7 +207,6 @@ def uploadVideo1(request):
     #     res = "{\"msg\": \"" + msg + "\"}"
     #     return HttpResponse(res)
     # video.course_id = course_id
-
 
     video_name = datetime.datetime.now().strftime("%m%d%H%M%S") + '.mp4'
     video_path = os.path.join('/beacon/media', video_name)
@@ -314,75 +304,134 @@ def uploadVideo2(request):
 
 
 # 每行依次是，学校，学号，真实姓名，邮箱
-def uploadCourseUser(request):
+def uploadCourseUser1(request):
     if (request.method != 'POST'):
         msg = 'fail'
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
-    csv_file = request.FILES.get('csv_file')
-    course_name = request.POST.get('course_name')
-    course_id = request.POST.get('course_id')
+    excel_file = request.FILES.get('file')
+    excel_name = request.FILES.get('file').name
+    # course_name = request.POST.get('course_name')
+    # course_id = request.POST.get('course_id')
+    # print(request)
+    # print(request.FILES)
+    # print(request.FILES.get('file'))
+    # print(request.FILES.get('file').name)
+    # print(request.POST)
+    # print(request.POST.get('file'))
 
-    if csv_file is None or course_name is None or course_id is None:
+    if excel_file is None:
         msg = 'empty input'
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
 
-    if not csv_file.name.endswith('.csv'):
-        msg = 'file is not csv type'
+    # if not csv_file.name.endswith('.csv'):
+    #     msg = 'file is not csv type'
+    #     res = "{\"msg\": \"" + msg + "\"}"
+    #     return HttpResponse(res)
+
+    excel_path = os.path.join('/beacon/excel', excel_name)
+    f = open(excel_path, 'wb')
+    for i in excel_file.chunks():
+        f.write(i)
+    f.close()
+
+    msg = excel_name
+    res = "{\"msg\": \"" + msg + "\"}"
+    return HttpResponse(res)
+
+
+def uploadCourseUser2(request):
+    if (request.method != 'POST'):
+        msg = 'fail'
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
+    course_id = request.POST.get('course_id')
+    excel_name = request.POST.get('excel_name')
 
-    file_data = csv_file.read().decode('utf-8')
-    lines = file_data.split('\n')
-    i=0
-    for line in lines:
-        fields = line.split(',')
-        realname = fields[2]
+    # print(os.path.join("/beacon/excel", excel_name))
+    # print(excel_name)
+
+    excel_path = os.path.join('/beacon/excel', excel_name)
+    try:
+        table = xlrd.open_workbook(excel_path, encoding_override='utf-8')
+    except Exception as Argument:
+        return HttpResponse(Argument)
+        msg = 'open excel error'
+        res = "{\"msg\": \"" + msg + "\"}"
+        return HttpResponse(res)
+    #remember to delete at last
+
+    sheet = table.sheets()[0]
+
+    # user_id_list = []
+    for i in range(1, sheet.nrows):
+        row_value = sheet.row_values(i)
+        print(row_value)
+        print(row_value[0])
+        email = row_value[3]
 
         try:
-            user = Userinfo.objects.filter(realname = realname)
+            user = Userinfo.objects.filter(email=email)
         except Exception:
-            msg = 'database search realname in UserInfo error'
+            msg = 'database search email in UserInfo error'
             res = "{\"msg\": \"" + msg + "\"}"
             return HttpResponse(res)
         if not user:
-            userInfo = Userinfo()
-            userInfo.school = fields[0]
-            userInfo.school_id = fields[1]
-            userInfo.realname = fields[2]
-            userInfo.email = fields[3]
+            userinfo = Userinfo()
+            userinfo.username = row_value[3]
+            userinfo.school = row_value[0]
+            userinfo.school_id = row_value[1]
+            userinfo.realname = row_value[2]
+            userinfo.email = row_value[3]
             try:
-                Userinfo.save()
+                userinfo.save()
             except Exception:
-                msg = 'database save userInfo error' + str(i)
-                i = i+1
-                # res = "{\"msg\": \"" + msg + "\"}"
-                res = fields[0]
+                msg = 'database save userInfo error'
+                res = "{\"msg\": \"" + msg + "\"}"
                 return HttpResponse(res)
+        # user = UserCourse.objects.filter(realname=realname)
+        # return HttpResponse(user + user.first())
+        else:
+            if user.school is not row_value[0] or user.school_id is not row_value[1] or user.realname is not row_value[2]:
+                continue
+
         try:
-            user = UserCourse.objects.filter(realname = realname)
+            userInUserinfo = Userinfo.objects.filter(email=email).first()
         except Exception:
-            msg = 'database search realname in UserCourse error'
+            msg = 'database search email in Userinfo error'
             res = "{\"msg\": \"" + msg + "\"}"
             return HttpResponse(res)
-        if not user:
+        user_id = userInUserinfo.id
+        # try:
+        #     userInUserCourse = UserCourse.objects.filter(user_id=user_id).first()
+        # except Exception:
+        #     msg = 'database search realname in UserCourse error'
+        #     res = "{\"msg\": \"" + msg + "\"}"
+        #     return HttpResponse(res)
+        # if not userInUserCourse:
+        #     userCourse = UserCourse()
+        #     userCourse.user_id = user_id
+        #     userCourse.user_identity = 0  # 每日任务-共享信息
+        #     try:
+        #         userCourse.save()
+        #     except Exception:
+        #         msg = 'database save userCourse error'
+        #         res = "{\"msg\": \"" + msg + "\"}"
+        #         return HttpResponse(res)
+        # user_id_list.append(user_id)
+
+        try:
+            userInUserCourse = UserCourse.objects.filter(user_id=user_id, course_id=course_id).first()
+        except Exception:
+            msg = 'database search user_id and course_id in UserCourse error'
+            res = "{\"msg\": \"" + msg + "\"}"
+            return HttpResponse(res)
+        if not userInUserCourse:
             userCourse = UserCourse()
-            try:
-                user = Userinfo.objects.filter(realname=realname)
-            except Exception:
-                msg = 'database search realname in UserInfo error'
-                res = "{\"msg\": \"" + msg + "\"}"
-                return HttpResponse(res)
-            userCourse.user = user
-            try:
-                course = Course.objects.filter(id=course_id)
-            except Exception:
-                msg = 'database search id in Course error'
-                res = "{\"msg\": \"" + msg + "\"}"
-                return HttpResponse(res)
-            userCourse.course = course
-            userCourse.user_identity = 1
+            userCourse.user_id = user_id
+            userCourse.course_id = course_id
+            userCourse.user_identity = 0  # 每日任务-共享信息
             try:
                 userCourse.save()
             except Exception:
@@ -390,18 +439,168 @@ def uploadCourseUser(request):
                 res = "{\"msg\": \"" + msg + "\"}"
                 return HttpResponse(res)
 
+    # file_data = csv_file.read().decode('gb2312', 'ignore')
+    # lines = file_data.split('\n')
+    # i=0
+    # for line in lines[1:]:
+    #     fields = line.split(',')
+    #     realname = fields[2]
+    #
+    #     try:
+    #         user = Userinfo.objects.filter(realname = realname)
+    #     except Exception:
+    #         msg = 'database search realname in UserInfo error'
+    #         res = "{\"msg\": \"" + msg + "\"}"
+    #         return HttpResponse(res)
+    #     if not user:
+    #         userInfo = Userinfo()
+    #         userInfo.school = fields[0]
+    #         userInfo.school_id = fields[1]
+    #         userInfo.realname = fields[2]
+    #         userInfo.email = fields[3]
+    #         print(fields[0])
+    #         print(fields[1])
+    #         print(fields[2])
+    #         print(fields[3])
+    #         print(userInfo.school)
+    #         print(userInfo.school_id)
+    #         print(userInfo.realname)
+    #         print(userInfo.email)
+    #         # try:
+    #         #     userInfo.save()
+    #         # except Exception:
+    #         #     msg = 'database save userInfo error' + str(i)
+    #         #     res = "{\"msg\": \"" + msg + "\"}"
+    #         #     # res = fields[0]
+    #         #     return HttpResponse(res)
+    #         userInfo.save()
+    #     # user = UserCourse.objects.filter(realname=realname)
+    #     # return HttpResponse(user + user.first())
+    #     try:
+    #         userInUserinfo = Userinfo.objects.filter(realname = realname).first()
+    #     except Exception:
+    #         msg = 'database search realname in Userinfo error'
+    #         res = "{\"msg\": \"" + msg + "\"}"
+    #         return HttpResponse(res)
+    #     user_id = userInUserinfo.id
+    #     try:
+    #         userInUserCourse = UserCourse.objects.filter(user_id = user_id).first()
+    #     except Exception:
+    #         msg = 'database search realname in UserCourse error'
+    #         res = "{\"msg\": \"" + msg + "\"}"
+    #         return HttpResponse(res)
+    #     if not userInUserCourse:
+    #         userCourse = UserCourse()
+    #         userCourse.user_id = user_id
+    #         userCourse.course_id = course_id
+    #         userCourse.user_identity = 0 #每日任务-共享信息
+    #         try:
+    #             userCourse.save()
+    #         except Exception:
+    #             msg = 'database save userCourse error'
+    #             res = "{\"msg\": \"" + msg + "\"}"
+    #             return HttpResponse(res)
+    #
+    #     i = i + 1
+
+    os.remove(excel_path)
+
     msg = 'success'
     res = "{\"msg\": \"" + msg + "\"}"
     return HttpResponse(res)
 
 
 
+# def uploadCourseUser2(request):
+#     if (request.method != 'POST'):
+#         msg = 'fail'
+#         res = "{\"msg\": \"" + msg + "\"}"
+#         return HttpResponse(res)
+#     user_id_list = request.POST.get('user_id_list')
+#     course_id = request.POST.get('course_id')
+#
+#     for user_id in user_id_list:
+#         try:
+#             userInUserCourse = UserCourse.objects.filter(user_id=user_id, course_id=course_id).first()
+#         except Exception:
+#             msg = 'database search user_id and course_id in UserCourse error'
+#             res = "{\"msg\": \"" + msg + "\"}"
+#             return HttpResponse(res)
+#         if not userInUserCourse:
+#             userCourse = UserCourse()
+#             userCourse.user_id = user_id
+#             userCourse.course_id = course_id
+#             userCourse.user_identity = 0  # 每日任务-共享信息
+#             try:
+#                 userCourse.save()
+#             except Exception:
+#                 msg = 'database save userCourse error1'
+#                 res = "{\"msg\": \"" + msg + "\"}"
+#                 return HttpResponse(res)
+#         else:
+#             if userInUserCourse.course_id is not course_id or
+#             userInUserCourse.course_id = course_id
+#             try:
+#                 userInUserCourse.save()
+#             except Exception:
+#                 msg = 'database save userCourse error2'
+#                 res = "{\"msg\": \"" + msg + "\"}"
+#                 return HttpResponse(res)
+#
+#     return HttpResponse('tmp_return')
+
+
+
+# 查看并发送好友私信：作为平台用户，我希望和已经是好友的平台成员发送私信并看到对方的。————维护消息数据表
+
+
+
+def getPrivateMessage(request):
+    if (request.method != 'POST'):
+        msg = 'fail'
+        res = "{\"msg\": \"" + msg + "\"}"
+        return HttpResponse(res)
+    dict = request.POST
+    sender = dict.get('sender')
+    receiver = dict.get('receiver')
+
+    if sender is None or receiver is None:
+        msg = 'empty input'
+        res = "{\"msg\": \"" + msg + "\"}"
+        return HttpResponse(res)
+
+    try:
+        privateMessage = PrivateMessage.objects.filter(sender=sender, receiver=receiver)
+    except Exception:
+        msg = 'database search sender and receiver in PrivateMessage error'
+        res = "{\"msg\": \"" + msg + "\"}"
+        return HttpResponse(res)
+    if not privateMessage:
+        msg = 'empty privateMessage'
+        res = "{\"msg\": \"" + msg + "\"}"
+        return HttpResponse(res)
+    else:
+
+
+
+
+
+def postPrivateMessage(request):
+    return HttpResponse('tmp_return')
+
+
+
+
+
+
 url_zzc = [
     url('createCourse', createCourse),
     # url('uploadVideo', uploadVideo),
-    url('uploadCourseUser', uploadCourseUser),
-
     url('uploadVideo1', uploadVideo1),
     url('uploadVideo2', uploadVideo2),
-
+    # url('uploadCourseUser', uploadCourseUser),
+    url('uploadCourseUser1', uploadCourseUser1),
+    url('uploadCourseUser2', uploadCourseUser2),
+    url('getPrivateMessage', getPrivateMessage),
+    url('postPrivateMessage', postPrivateMessage),
 ]
