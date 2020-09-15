@@ -1,15 +1,5 @@
 from django.db import models
 from datetime import datetime
-#申请
-class Applications(models.Model):
-    student = models.ForeignKey('Userinfo', models.DO_NOTHING, blank=True, null=True)
-    course = models.ForeignKey('Course', models.DO_NOTHING, blank=True, null=True)
-    application_start_time = models.DateTimeField(blank=True, null=True)
-    application_examine_time = models.DateTimeField(blank=True, null=True)
-    application_result = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        db_table = 'applications'
 #课程圈子
 class Course(models.Model):
     course_name = models.CharField(max_length=100)
@@ -19,6 +9,7 @@ class Course(models.Model):
     end_time = models.DateTimeField(blank=True, null=True)
     profession = models.CharField(max_length=30, blank=True, null=True)
     is_open = models.IntegerField(default=0)
+    teacher_name = models.CharField(max_length=30, blank=True, null=True)
 
     class Meta:
         db_table = 'course'
@@ -53,7 +44,7 @@ class Post(models.Model):
 class UserCourse(models.Model):
     user = models.ForeignKey('Userinfo', models.DO_NOTHING, blank=True, null=True)
     course = models.ForeignKey(Course, models.DO_NOTHING, blank=True, null=True)
-    watch_duration = models.TimeField(blank=True, null=True)
+    watch_duration = models.IntegerField(blank=True, null=True)
     watch_num = models.IntegerField(blank=True, null=True)
     user_identity = models.IntegerField(blank=True, null=True)
     activity = models.IntegerField(blank=True, null=True)
@@ -65,7 +56,7 @@ class UserCourse(models.Model):
 #用户-播放记录
 class UserPlayRecords(models.Model):
     user_video = models.ForeignKey('UserVideo', models.DO_NOTHING)
-    played_time = models.TimeField(blank=True, null=True)
+    played_time = models.IntegerField(blank=True, null=True)
     start_play_time = models.DateTimeField(blank=True, null=True)
 
     class Meta:
@@ -75,7 +66,7 @@ class UserPlayRecords(models.Model):
 class UserVideo(models.Model):
     user = models.ForeignKey('Userinfo', models.DO_NOTHING, blank=True, null=True)
     video = models.ForeignKey('Videos', models.DO_NOTHING, blank=True, null=True)
-    video_viewed_time = models.TimeField(blank=True, null=True)
+    video_viewed_time = models.IntegerField(blank=True, null=True)
     video_viewed_times = models.IntegerField(blank=True, null=True)
 
     class Meta:
@@ -103,7 +94,7 @@ class Userinfo(models.Model):
 class Videos(models.Model):
     title = models.CharField(max_length=100, blank=True, null=True)
     introduction = models.TextField(blank=True, null=True)
-    video_duration = models.TimeField(blank=True, null=True)
+    video_duration = models.IntegerField(blank=True, null=True)
     local_address = models.CharField(max_length=100, blank=True, null=True)
     course = models.ForeignKey(Course, models.DO_NOTHING, blank=True, null=True)
     upload_time = models.DateTimeField(blank=True, null=True)
@@ -118,4 +109,57 @@ class LikeRecord(models.Model):
     like_type = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        db_table = 'likerecord'
+        db_table = 'like_record'
+
+#课程申请记录
+class CourseApplication(models.Model):
+    course = models.ForeignKey('Course', models.DO_NOTHING, blank=True, null=True)
+    user = models.ForeignKey('Userinfo', models.DO_NOTHING, blank=True, null=True)
+    result = models.IntegerField(blank=True, null=True)
+    application_time = models.DateTimeField(blank=True, null=True)
+    content = models.CharField(max_length=200, blank=True, null=True)
+
+    class Meta:
+        db_table = 'course_application'
+
+#好友申请记录
+class FriendApplication(models.Model):
+    applicant = models.ForeignKey('Userinfo', models.DO_NOTHING, blank=True, null=True, related_name='applicant')
+    target = models.ForeignKey('Userinfo', models.DO_NOTHING, blank=True, null=True, related_name='target')
+    application_content = models.CharField(max_length=200, blank=True, null=True)
+    application_time = models.DateTimeField(blank=True, null=True)
+    result = models.IntegerField(blank=True, null=True)
+    handle_content = models.CharField(max_length=200, blank=True, null=True)
+
+    class Meta:
+        db_table = 'friend_application'
+
+#好友记录
+class FriendRecord(models.Model):
+    user1 = models.ForeignKey('Userinfo', models.DO_NOTHING, blank=True, null=True, related_name='user1')
+    user2 = models.ForeignKey('Userinfo', models.DO_NOTHING, blank=True, null=True, related_name='user2')
+
+    class Meta:
+        db_table = 'friend_record'
+
+#系统消息
+class SystemMessage(models.Model):
+    target = models.ForeignKey('Userinfo', models.DO_NOTHING, blank=True, null=True)
+    message_title = models.CharField(max_length=200, blank=True, null=True)
+    message_content = models.CharField(max_length=200, blank=True, null=True)
+    is_read = models.IntegerField(blank=True, null=True)
+    send_time = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'system_message'
+
+#私信
+class PrivateMessage(models.Model):
+    sender = models.ForeignKey('Userinfo', models.DO_NOTHING, blank=True, null=True, related_name='sender')
+    receiver = models.ForeignKey('Userinfo', models.DO_NOTHING, blank=True, null=True, related_name='receiver')
+    content = models.CharField(max_length=200, blank=True, null=True)
+    send_time = models.DateTimeField(blank=True, null=True)
+    is_read = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'private_message'
