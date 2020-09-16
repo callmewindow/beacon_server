@@ -326,8 +326,4 @@ url_ct = [
     url('cancelStarPost',cancelStarPost),
     url('searchPost',searchPost),
     url('searchCourse',searchCourse),
-<<<<<<< HEAD
-=======
-
->>>>>>> 755a548947ec8c88462e8a4440f9237f37221de9
 	]
