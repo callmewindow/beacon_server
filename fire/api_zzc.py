@@ -10,6 +10,7 @@ from moviepy.editor import VideoFileClip
 from django.conf.urls import url
 import xlrd
 import xlwt
+import traceback
 
 
 def createCourse(request):
@@ -697,14 +698,187 @@ def postPrivateMessage(request):
 
 
 
-def sendFriendApplication(request):
-    if (request.method != 'POST'):
-        msg = 'fail'
-        res = "{\"msg\": \"" + msg + "\"}"
-        return HttpResponse(res)
-    dict = request.POST
-    
+def json_raw(dict):
+	return str(dict).replace('\'','\"').replace('None','null')
 
+def sendFriendApplication(request):
+    try:
+        msg = {}
+        if (request.method != 'POST'):
+            msg['result'] = 'not post'
+            return HttpResponse(json_raw(msg))
+        dict = request.POST
+        applicant_id = dict.get('applicant_id')
+        target_id = dict.get('target_id')
+        application_content = dict.get('application_content') # spell correctly
+        application_time = dict.get('application_time')
+
+        if applicant_id is None:
+            msg['result'] = 'empty applicant_id'
+            return HttpResponse(json_raw(msg))
+        if target_id is None:
+            msg['result'] = 'empty target_id'
+            return HttpResponse(json_raw(msg))
+        if application_content is None:
+            msg['result'] = 'empty application_content'
+            return HttpResponse(json_raw(msg))
+        if application_time is None:
+            msg['result'] = 'empty application time'
+            return HttpResponse(json_raw(msg))
+
+        friendApplication = FriendApplication.objects.filter(applicant_id=applicant_id, target_id=target_id)
+        if friendApplication:
+            msg['result'] = 'already applied'
+            return HttpResponse(json_raw(msg))
+        friendApplication = FriendApplication()
+        friendApplication.applicant_id = applicant_id
+        friendApplication.target_id = target_id
+        friendApplication.application_content = application_content
+        friendApplication.application_time = datetime.datetime.strptime(application_time, '%Y-%m-%d %H:%M:%S')
+        friendApplication.save()
+        msg['result'] = 'success'
+        return HttpResponse(json_raw(msg))
+    except:
+        traceback.print_exc()
+        msg['result'] = 'Unexpected Error'
+        return HttpResponse(json_raw(msg))
+
+
+
+def passFriendApplication(request):
+    try:
+        msg = {}
+        if (request.method != 'POST'):
+            msg['result'] = 'not post'
+            return HttpResponse(json_raw(msg))
+        dict = request.POST
+        applicant_id = dict.get('applicant_id')
+        target_id = dict.get('target_id')
+        handle_content = dict.get('handle_content')
+
+        if applicant_id is None:
+            msg['result'] = 'empty applicant_id'
+            return HttpResponse(json_raw(msg))
+        if target_id is None:
+            msg['result'] = 'empty target_id'
+            return HttpResponse(json_raw(msg))
+        if handle_content is None:
+            msg['result'] = 'empty handle_content'
+
+        friendApplication = FriendApplication.objects.filter(applicant_id=applicant_id, target_id=target_id).first()
+        if not friendApplication:
+            msg['result'] = 'no friend application'
+            return HttpResponse(json_raw(msg))
+        friendApplication.result = 1
+        friendApplication.handle_content = handle_content
+        friendApplication.save()
+        msg['result'] = 'success'
+        return HttpResponse(json_raw(msg))
+    except:
+        traceback.print_exc()
+        msg['result'] = 'Unexpected Error'
+        return HttpResponse(json_raw(msg))
+
+
+
+def rejectFriendApplication(request):
+    try:
+        msg = {}
+        if (request.method != 'POST'):
+            msg['result'] = 'not post'
+            return HttpResponse(json_raw(msg))
+        dict = request.POST
+        applicant_id = dict.get('applicant_id')
+        target_id = dict.get('target_id')
+        handle_content = dict.get('handle_content')
+
+        if applicant_id is None:
+            msg['result'] = 'empty applicant_id'
+            return HttpResponse(json_raw(msg))
+        if target_id is None:
+            msg['result'] = 'empty target_id'
+            return HttpResponse(json_raw(msg))
+        if handle_content is None:
+            msg['result'] = 'empty handle_content'
+
+        friendApplication = FriendApplication.objects.filter(applicant_id=applicant_id, target_id=target_id).first()
+        if not friendApplication:
+            msg['result'] = 'no friend application'
+            return HttpResponse(json_raw(msg))
+        friendApplication.result = 2
+        friendApplication.handle_content = handle_content
+        friendApplication.save()
+        msg['result'] = 'success'
+        return HttpResponse(json_raw(msg))
+    except:
+        traceback.print_exc()
+        msg['result'] = 'Unexpected Error'
+        return HttpResponse(json_raw(msg))
+
+
+
+def getFriendApplication(request):
+    try:
+        msg = {}
+        if (request.method != 'POST'):
+            msg['result'] = 'not post'
+            return HttpResponse(json_raw(msg))
+        dict = request.POST
+        applicant_id = dict.get('applicant_id')
+        target_id = dict.get('target_id')
+
+        if applicant_id is None:
+            msg['result'] = 'empty applicant_id'
+            return HttpResponse(json_raw(msg))
+        if target_id is None:
+            msg['result'] = 'empty target_id'
+            return HttpResponse(json_raw(msg))
+
+        friendApplication = FriendApplication.objects.filter(applicant_id=applicant_id, target_id=target_id).first()
+        if not friendApplication:
+            msg['result'] = 'no friend application'
+            return HttpResponse(json_raw(msg))
+        msg['application_content'] = friendApplication.application_content
+        msg['application_time'] = datetime.datetime.strftime(friendApplication.application_time, '%Y-%m-%d %H:%M:%S')
+        msg['result'] = friendApplication.result
+        msg['handle_content'] = friendApplication.handle_content
+        return HttpResponse(json_raw(msg))
+    except:
+        traceback.print_exc()
+        msg['result'] = 'Unexpected Error'
+        return HttpResponse(json_raw(msg))
+
+
+
+
+def deleteFriendRecord(request):
+    try:
+        msg = {}
+        if (request.method != 'POST'):
+            msg['result'] = 'not post'
+            return HttpResponse(json_raw(msg))
+        dict = request.POST
+        user1_id = dict.get('user1_id')
+        user2_id = dict.get('user2_id')
+
+        if user1_id is None:
+            msg['result'] = 'empty user1_id'
+            return HttpResponse(json_raw(msg))
+        if user2_id is None:
+            msg['result'] = 'empty user2_id'
+            return HttpResponse(json_raw(msg))
+
+        friendRecord = FriendRecord.objects.filter(user1_id=user1_id, user2_id=user2_id)
+        if not friendRecord:
+            msg['result'] = 'empty friend record'
+            return HttpResponse(json_raw(msg))
+        FriendRecord.objects.filter(user1_id=user1_id, user2_id=user2_id).delete()
+        msg['result'] = 'success'
+        return HttpResponse(json_raw(msg))
+    except:
+        traceback.print_exc()
+        msg['result'] = 'Unexpected Error'
+        return HttpResponse(json_raw(msg))
 
 
 
@@ -720,4 +894,8 @@ url_zzc = [
     # url('getPrivateMessage', getPrivateMessage),
     url('postPrivateMessage', postPrivateMessage),
     url('sendFriendApplication', sendFriendApplication),
+    url('passFriendApplication', passFriendApplication),
+    url('rejectFriendApplication', rejectFriendApplication),
+    url('getFriendApplication', getFriendApplication),
+    url('deleteFriendRecord', deleteFriendRecord),
 ]
