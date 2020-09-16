@@ -464,7 +464,6 @@ def createCourseApplication(request):
     if(class_id == -1):
         msg = '需要课程id'
         res = '{"message":' + '"' + msg + '"' +'}'
-        res += str(request.POST) 
         return HttpResponse(res)
 
     student_id = request.GET.get("student_id", -1)
@@ -495,6 +494,138 @@ def createCourseApplication(request):
     res = '{"message":' + '"' + msg + '"' +'}'
     return HttpResponse(res)
 
+def updateUser(request):
+    if(request.method != 'POST'): 
+        msg = '需要POST请求'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    
+    user_id = request.POST.get("user_id", -1)
+    if(user_id == -1):
+        msg = '需要课程id'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    
+    #先找到记录
+    user = None
+    try:
+        user = Userinfo.objects.get(id=user_id)
+    except Exception as e:
+        msg = '没有该用户id'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    
+    #以下为非必须
+    username = request.POST.get("username", -1)
+    if(username != -1 and type(username) != type("")):
+        msg = 'username数据类型错误'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    if(username != -1):
+        user.username = username
+
+    user_password = request.POST.get("user_password", -1)
+    if(user_password != -1 and type(user_password) != type("")):
+        msg = 'user_password数据类型错误'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    if(user_password != -1):
+        user.user_password = user_password
+
+    user_nickname = request.POST.get("user_nickname", -1)
+    if(user_nickname != -1 and type(user_nickname) != type("")):
+        msg = 'user_nickname数据类型错误'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    if(user_nickname != -1):
+        user.user_nickname = user_nickname
+
+    introduction = request.POST.get("introduction", -1)
+    if(introduction != -1 and type(introduction) != type("")):
+        msg = 'introduction数据类型错误'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    if(introduction != -1):
+        user.introduction = introduction
+
+    phonenumber = request.POST.get("phonenumber", -1)
+    if(phonenumber != -1 and type(phonenumber) != type("")):
+        msg = 'phonenumber数据类型错误'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    if(phonenumber != -1):
+        user.phonenumber = phonenumber
+
+    email = request.POST.get("email", -1)
+    if(email != -1 and type(email) != type("")):
+        msg = 'email数据类型错误'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    if(email != -1):
+        user.email = email
+
+    qq = request.POST.get("qq", -1)
+    if(qq != -1 and type(qq) != type("")):
+        msg = 'qq数据类型错误'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    if(qq != -1):
+        user.qq = qq
+
+    teacher_identity = request.POST.get("teacher_identity", -1)
+    if(teacher_identity != -1 and type(teacher_identity) != type(1)):
+        teacher_id = -1
+        try:
+            teacher_id = int(teacher_identity)
+        except Exception as e:
+            msg = 'teacher_identity数据类型错误'
+            res = '{"message":' + '"' + msg + '"' +'}'
+            return HttpResponse(res)
+
+        if(teacher_id != -1):
+            user.teacher_identity = teacher_id
+
+    school = request.POST.get("school", "")
+    if(school != "" and type(school) != type("")):
+        msg = 'school数据类型错误'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    if(school != ""):
+        user.school = school
+
+    school_id = request.POST.get("school_id", "")
+    if(school_id != "" and type(school_id) != type("")):
+        msg = 'school_id数据类型错误'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    if(school_id != ""):
+        user.school_id = school_id
+    
+    realname = request.POST.get("realname", "")
+    if(realname != "" and type(realname) != type("")):
+        msg = 'realname数据类型错误'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    if(realname != ""):
+        user.realname = realname
+
+    profession = request.POST.get("profession", "")
+    if(profession != "" and type(profession) != type("")):
+        msg = 'profession数据类型错误'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    if(profession != ""):
+        user.profession = profession
+
+    user.save()
+    
+    msg = 'success'
+    res = '{"message":' + '"' + msg + '"' +'}'
+
+    # res += realname
+
+    return HttpResponse(res)
+
 url_jyh = [
     url(r'video/play/', getVideo),
     url(r'circle/open/', openCircle),
@@ -506,4 +637,5 @@ url_jyh = [
     url(r'student/manage/del/', delStudent),    
     url(r'student/manage/update/', updateStudent),
     url(r'class/application/create/', createCourseApplication),
+    url(r'user/manage/update/', updateUser)
 ]
