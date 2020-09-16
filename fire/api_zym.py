@@ -269,6 +269,33 @@ def quit_delete(request):
 		msg['message'] = 'Unexpected Error'
 		return JsonResponse(msg, safe=False)
 
+def get_courses_in_possession(request):
+	try:
+		dict = request.GET
+		msg = {}
+		msg['message'] = ''
+		userid = dict.get('user_id', None)
+		if userid == None:
+			msg['message'] = '用户id不能为空。'
+			return JsonResponse(msg, safe=False)
+
+		list = Course.objects.filter(teacher_id=userid)
+		course_list = []
+		if list:
+			for i in list:
+				c = model_to_dict(i)
+				course_list.append(c)
+			msg['course_list'] = course_list
+			msg['message'] = 'OK'
+			return JsonResponse(msg, safe=False)
+		else:
+			msg['message'] = '该用户未创建任何课程。'
+			return JsonResponse(msg, safe=False)
+	except:
+		traceback.print_exc()
+		msg['message'] = 'Unexpected Error'
+		return JsonResponse(msg, safe=False)
+
 url_zym = [
 	url('usercourse', get_course_by_userid),
 	url('userdetail', get_userinfo_by_userid),
@@ -277,4 +304,5 @@ url_zym = [
 	url('class/application/reject', reject_application),
 	url('class/quit', quit_course),
 	url('class/delete', quit_delete),
+	url('class/asowner', get_courses_in_possession),
 	]
