@@ -1,5 +1,5 @@
 import json
-from builtins import type, eval, Exception, range
+from builtins import type, eval, Exception, range, int, sorted
 
 from django.shortcuts import render
 from fire.models import *
@@ -304,7 +304,7 @@ def uploadVideo2(request):
 
 
 # 每行依次是，学校，学号，真实姓名，邮箱
-def uploadCourseUser1(request):
+def uploadUserCourse1(request):
     if (request.method != 'POST'):
         msg = 'fail'
         res = "{\"msg\": \"" + msg + "\"}"
@@ -336,18 +336,22 @@ def uploadCourseUser1(request):
         f.write(i)
     f.close()
 
-    msg = excel_name
-    res = "{\"msg\": \"" + msg + "\"}"
-    return HttpResponse(res)
+    return HttpResponse(excel_name)
 
 
-def uploadCourseUser2(request):
+def uploadUserCourse2(request):
     if (request.method != 'POST'):
         msg = 'fail'
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
-    course_id = request.POST.get('course_id')
+    course_id = int(request.POST.get('course_id'))
     excel_name = request.POST.get('excel_name')
+
+    print(type(course_id))
+    print(course_id)
+    print(excel_name)
+    if course_id is None or excel_name is None:
+        return HttpResponse("empty input")
 
     # print(os.path.join("/beacon/excel", excel_name))
     # print(excel_name)
@@ -372,7 +376,7 @@ def uploadCourseUser2(request):
         email = row_value[3]
 
         try:
-            user = Userinfo.objects.filter(email=email)
+            user = Userinfo.objects.filter(email=email).first()
         except Exception:
             msg = 'database search email in UserInfo error'
             res = "{\"msg\": \"" + msg + "\"}"
@@ -511,7 +515,7 @@ def uploadCourseUser2(request):
 
 
 
-# def uploadCourseUser2(request):
+# def uploadUserCourse2(request):
 #     if (request.method != 'POST'):
 #         msg = 'fail'
 #         res = "{\"msg\": \"" + msg + "\"}"
@@ -555,40 +559,151 @@ def uploadCourseUser2(request):
 
 
 
-def getPrivateMessage(request):
+def getPrivateMessages(request):
     if (request.method != 'POST'):
         msg = 'fail'
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
     dict = request.POST
-    sender = dict.get('sender')
-    receiver = dict.get('receiver')
+    user_id1 = dict.get('user_id1')
+    user_id2 = dict.get('user_id2')
 
-    if sender is None or receiver is None:
+    if user_id1 is None or user_id2 is None:
         msg = 'empty input'
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
 
     try:
-        privateMessage = PrivateMessage.objects.filter(sender=sender, receiver=receiver)
+        privateMessages = PrivateMessage.objects.filter(sender_id=user_id1, receiver_id=user_id2)
     except Exception:
-        msg = 'database search sender and receiver in PrivateMessage error'
+        msg = 'database search sender_id and receiver_id in PrivateMessage error1'
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
-    if not privateMessage:
-        msg = 'empty privateMessage'
-        res = "{\"msg\": \"" + msg + "\"}"
-        return HttpResponse(res)
+    flag = 0
+    result = []
+    if not privateMessages:
+        flag = 1
     else:
+        for privateMessage in privateMessages:
+            send_time = datetime.datetime.strftime(privateMessage.send_time, '%Y-%m-%d %H:%M:%S')
+            one_message = {}
+            one_message["sender_id"] = privateMessage.sender_id
+            one_message["content"] = privateMessage.content
+            one_message["send_time"] = send_time
+            result.append(one_message)
+            privateMessage.is_read = 1
+            privateMessage.save()
+    print(result)
+    try:
+        privateMessages2 = PrivateMessage.objects.filter(sender_id=user_id2, receiver_id=user_id1)
+    except Exception:
+        msg = 'database search sender_id and receiver_id in PrivateMessage error2'
+        res = "{\"msg\": \"" + msg + "\"}"
+        return HttpResponse(res)
+    print(privateMessages)
+    if not privateMessages2:
+        if flag == 1:
+            msg = 'empty privateMessage'
+            res = "{\"msg\": \"" + msg + "\"}"
+            return HttpResponse(res)
+        else:
+            result = sorted(result, key=lambda keys: keys['send_time'])
+            # result.sort(key=send_time)
+            # res = "{\"result\":" + str(result) + "}"
+            # return HttpResponse(res)
+            return HttpResponse(json.dumps(result))
+    else:
+        for privateMessage in privateMessages2:
+            send_time = datetime.datetime.strftime(privateMessage.send_time, '%Y-%m-%d %H:%M:%S')
+            one_message = {}
+            one_message["sender_id"] = privateMessage.sender_id
+            one_message["content"] = privateMessage.content
+            one_message["send_time"] = send_time
+            result.append(one_message)
+            privateMessage.is_read = 1
+            privateMessage.save()
+            print(result)
+        result = sorted(result, key=lambda keys: keys['send_time'])
+        # result.sort(key=send_time)
+        # res = "{\"result\":" + str(result) + "}"
+        # return HttpResponse(res)
+        return HttpResponse(json.dumps(result))
 
 
+
+# def getPrivateMessage(request):
+#     if (request.method != 'POST'):
+#         msg = 'fail'
+#         res = "{\"msg\": \"" + msg + "\"}"
+#         return HttpResponse(res)
+#     dict = request.POST
+#     sender_id = dict.get('sender_id')
+#     receiver_id = dict.get('receiver_id')
+#     send_time = dict.get('send_time')
+#
+#     if sender_id is None or receiver_id is None or send_time is None:
+#         msg = 'empty input'
+#         res = "{\"msg\": \"" + msg + "\"}"
+#         return HttpResponse(res)
+#
+#     try:
+#         privateMessage = PrivateMessage.objects.filter(sender=sender_id, receiver=receiver_id, send_time=send_time)
+#     except:
+#         msg = 'database search sender_id, receiver_id and send_time in PrivateMessage error'
+#         res = "{\"msg\": \"" + msg + "\"}"
+#         return HttpResponse(res)
+#     if not privateMessage:
+#         msg = 'privateMessage do not exist'
+#         res = "{\"msg\": \"" + msg + "\"}"
+#         return HttpResponse(res)
+#     content = privateMessage.content
+#
+#     return HttpResponse(content)
 
 
 
 def postPrivateMessage(request):
-    return HttpResponse('tmp_return')
+    if (request.method != 'POST'):
+        msg = 'fail'
+        res = "{\"msg\": \"" + msg + "\"}"
+        return HttpResponse(res)
+    dict = request.POST
+    sender_id = dict.get('sender_id')
+    receiver_id = dict.get('receiver_id')
+    content = dict.get('content')
+    send_time = dict.get('send_time')
+
+    if sender_id is None or receiver_id is None or content is None or send_time is None:
+        msg = 'empty input'
+        res = "{\"msg\": \"" + msg + "\"}"
+        return HttpResponse(res)
+
+    privateMessage = PrivateMessage()
+    privateMessage.sender_id = sender_id
+    privateMessage.receiver_id = receiver_id
+    privateMessage.content = content
+    privateMessage.send_time = datetime.datetime.strptime(send_time, '%Y-%m-%d %H:%M:%S')
+    privateMessage.is_read = 0
+    try:
+        privateMessage.save()
+    except:
+        msg = 'database save privateMessage error'
+        res = "{\"msg\": \"" + msg + "\"}"
+        return HttpResponse(res)
+
+    msg = 'success'
+    res = "{\"msg\": \"" + msg + "\"}"
+    return HttpResponse(res)
 
 
+
+def sendFriendApplication(request):
+    if (request.method != 'POST'):
+        msg = 'fail'
+        res = "{\"msg\": \"" + msg + "\"}"
+        return HttpResponse(res)
+    dict = request.POST
+    
 
 
 
@@ -598,9 +713,11 @@ url_zzc = [
     # url('uploadVideo', uploadVideo),
     url('uploadVideo1', uploadVideo1),
     url('uploadVideo2', uploadVideo2),
-    # url('uploadCourseUser', uploadCourseUser),
-    url('uploadCourseUser1', uploadCourseUser1),
-    url('uploadCourseUser2', uploadCourseUser2),
-    url('getPrivateMessage', getPrivateMessage),
+    # url('uploadUserCourse', uploadUserCourse),
+    url('uploadUserCourse1', uploadUserCourse1),
+    url('uploadUserCourse2', uploadUserCourse2),
+    url('getPrivateMessages', getPrivateMessages),
+    # url('getPrivateMessage', getPrivateMessage),
     url('postPrivateMessage', postPrivateMessage),
+    url('sendFriendApplication', sendFriendApplication),
 ]
