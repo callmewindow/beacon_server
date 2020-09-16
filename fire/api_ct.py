@@ -330,13 +330,10 @@ url_ct = [
 	#url('getPostInfo',getPostInfo),
     url('replyPost',replyPost),
     url('cicleAllPost',cicleAllPost),
-<<<<<<< HEAD
-=======
     url('topPost',topPost),
     url('starPost',starPost),
     url('cancelTopPost',cancelTopPost),
     url('cancelStarPost',cancelStarPost),
     url('searchPost',searchPost),
     url('searchCourse',searchCourse),
->>>>>>> 78c11e68dcf512e406ef1431bd1db2e8daad4f7e
 	]

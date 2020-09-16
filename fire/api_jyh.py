@@ -3,7 +3,6 @@ from fire.models import *
 from django.conf.urls import url
 from django.forms.models import model_to_dict
 import time
-from django.views.decorators.csrf import csrf_exempt
 
 def getVideo(request):
     if(request.method != 'GET'): 
@@ -116,6 +115,12 @@ def getClassBasicInfo(request):
         res = '{"message":' + '"' + msg + '"' +'}'
         return HttpResponse(res)
 
+    student_id = request.GET.get("user_id", -1)
+    if(student_id == -1):
+        msg = '需要学生id'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+
     #找到指定的课
     course = None
     try:
@@ -124,7 +129,6 @@ def getClassBasicInfo(request):
         msg = '找不到指定课程'
         res = '{"message":' + '"' + msg + '"' +'}'
         return HttpResponse(res)
-    
 
     #找信息
     course_name = course.course_name
@@ -148,8 +152,45 @@ def getClassBasicInfo(request):
     course_info["is_open"] = course.is_open    
     course_info["person_number"] = person_number
 
+    #找一下老师    
+    teacher_id = None
+    teacher = None
+    try:
+        #先找到course表里面的老师id
+        teacher_id = Course.objects.get(id=class_id).teacher_id_id
+        #如果是null,默认第一条
+        if(teacher_id == None):
+            teacher = Userinfo.objects.get(id=1)
+        else:
+            #然后去userinfo表里面
+            teacher = Userinfo.objects.get(id=teacher_id)
+    except Exception as e:
+        msg = '找不到老师'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    
+    teacher_name = teacher.username
+    teacher_university = teacher.school
+
+    send_teacher = {}
+    send_teacher["teacher_id"] = teacher_id
+    send_teacher["teacher_name"] = teacher_name
+    send_teacher["teacher_university"] = teacher_university
+
+    #检查一下关系
+    relation = -1
+    u_v_record = None
+    try:
+        #查找用户视频记录
+        u_v_record = UserCourse.objects.get(course_id=class_id, user_id=student_id)
+        relation = u_v_record.user_identity
+    except Exception as e:
+        relation = 0
+
     send = {}
     send["course"] = course_info
+    send["relation"] = relation
+    send["teacher"] = send_teacher
     send["message"] = "success"
 
     return JsonResponse(send, safe=False)
@@ -212,12 +253,6 @@ def searchStudent(request):
         res = '{"message":' + '"' + msg + '"' +'}'
         return HttpResponse(res)
 
-    # student_id = request.GET.get("student_id", -1)
-    # if(student_id == -1):
-    #     msg = '需要学生id'
-    #     res = '{"message":' + '"' + msg + '"' +'}'
-    #     return HttpResponse(res)
-
     # 找到指定的记录
     student = UserCourse.objects.filter(course_id=class_id)
 
@@ -226,18 +261,48 @@ def searchStudent(request):
         res = '{"message":' + '"' + msg + '"' +'}'
         return HttpResponse(res)
 
-    # if(len(student) > 1):
-    #     msg = '学习记录异常，出现重复'
-    #     res = '{"message":' + '"' + msg + '"' +'}'
-    #     return HttpResponse(res)
+    send_u = []
 
-    student_send = [x for x in student.values()]
+    for s in student:
+        send_uu = {}
+        user = None
+
+        try:
+            #先看看这个在表中存不存在
+            user = Userinfo.objects.get(id=s.user_id)
+        except Exception as e:
+            msg = '不存在id为' + str(s.user_id) + '的用户'
+            res = '{"message":' + '"' + msg + '"' +'}'
+            return HttpResponse(res)
+
+        send_uu["id"] = s.id
+        send_uu["user_id"] = s.user_id
+        send_uu["course_id"] = s.course_id
+        send_uu["watch_duration"] = s.watch_duration
+        send_uu["watch_num"] = s.watch_num
+        send_uu["user_identity"] = s.user_identity
+        send_uu["activity"] = s.activity
+        send_uu["point"] = s.point
+
+        #之后是从userinfo表里查到的数据
+        send_uu["username"] = user.username
+        send_uu["user_password"] = user.user_password
+        send_uu["user_nickname"] = user.user_nickname
+        send_uu["introduction"] = user.introduction
+        send_uu["user_password"] = user.user_password
+        send_uu["phonenumber"] = user.phonenumber
+        send_uu["email"] = user.email
+        send_uu["qq"] = user.qq
+        send_uu["teacher_identity"] = user.teacher_identity
+        send_uu["school"] = user.school
+        send_uu["school_id"] = user.school_id
+        send_uu["realname"] = user.realname
+        send_uu["profession"] = user.profession
+
+        send_u += [send_uu]
 
     send = {}
-    # send["students"] = student_send
-
-    send["students"] = [x for x in student.values()]
-
+    send["students"] = send_u
     send["message"] = "success"
     
     return JsonResponse(send, safe=False)
@@ -389,7 +454,6 @@ def updateStudent(request):
     res = '{"message":' + '"' + msg + '"' +'}'
     return HttpResponse(res)
 
-@csrf_exempt
 def createCourseApplication(request):
     if(request.method != 'GET'): 
         msg = '需要GET请求'

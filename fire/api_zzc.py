@@ -580,7 +580,7 @@ def getPrivateMessage(request):
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
     else:
-
+        pass
 
 
 
