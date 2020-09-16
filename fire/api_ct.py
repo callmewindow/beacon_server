@@ -130,21 +130,16 @@ def cicleAllPost(request):
             content = floor_1_res[0].content
             watches = i.watches
             like_num = floor_1_res[0].like_num
-            if i.topped:
-                topped = str(i.topped)
-            else:
-                topped = 'null'
-            if i.stared:
-                stared = str(i.stared)
-            else:
-                stared = 'null'
+            topped = i.topped
+            stared = i.stared
+            tag = i.tag
             floor_list = Floor.objects.filter(post_id=i.id)
             reply_num = 0
             for x in floor_list:
                 reply_num = reply_num+1
             reply_num = reply_num-1
                
-            content = {'id':str(i.id), 'title':i.title, 'author':author_name, 'nickname':nickname, 'teacher_identity':teacher_identity, 'datetime':str(datetime), 'content':content, 'read':str(watches), 'like':str(like_num), 'reply_num':reply_num ,'top':topped ,'highlight':stared,'last_time':tmp_list[0]['last_time'], 'last_name':tmp_list[0]['last_name']}
+            content = {'id':str(i.id), 'title':i.title, 'author':author_name, 'nickname':nickname, 'teacher_identity':teacher_identity, 'datetime':str(datetime), 'content':content, 'read':str(watches), 'like':str(like_num), 'reply_num':reply_num ,'topped':topped ,'stared':stared, 'tag':tag, 'last_time':tmp_list[0]['last_time'], 'last_name':tmp_list[0]['last_name']}
             post_list.append(content)
         post_list.sort(key=operator.itemgetter('last_time'),reverse=True)
         #msg = "{\"msg\":\"ok\"" + "\"post_list\"" + "\""+ post_list+ "\"" +"}"\
@@ -300,21 +295,16 @@ def searchPost(request):
             content = floor_1_res[0].content
             watches = i.watches
             like_num = floor_1_res[0].like_num
-            if i.topped:
-                topped = str(i.topped)
-            else:
-                topped = 'null'
-            if i.stared:
-                stared = str(i.stared)
-            else:
-                stared = 'null'
+            topped = i.topped
+            stared = i.stared
+            tag = i.tag
             floor_list = Floor.objects.filter(post_id=i.id)
             reply_num = 0
             for x in floor_list:
                 reply_num = reply_num+1
             reply_num = reply_num-1
                
-            content = {'id':str(i.id), 'title':i.title, 'author':author_name, 'nickname':nickname, 'teacher_identity':teacher_identity, 'datetime':str(datetime), 'content':content, 'read':str(watches), 'like':str(like_num), 'reply_num':reply_num ,'top':topped ,'highlight':stared,'last_time':tmp_list[0]['last_time'], 'last_name':tmp_list[0]['last_name']}
+            content = {'id':str(i.id), 'title':i.title, 'author':author_name, 'nickname':nickname, 'teacher_identity':teacher_identity, 'datetime':str(datetime), 'content':content, 'read':str(watches), 'like':str(like_num), 'reply_num':reply_num ,'topped':topped ,'stared':stared,'tag':tag,'last_time':tmp_list[0]['last_time'], 'last_name':tmp_list[0]['last_name']}
             post_list.append(content)
         post_list.sort(key=operator.itemgetter('last_time'),reverse=True)
         #msg = "{\"msg\":\"ok\"" + "\"post_list\"" + "\""+ post_list+ "\"" +"}"\
@@ -336,4 +326,8 @@ url_ct = [
     url('cancelStarPost',cancelStarPost),
     url('searchPost',searchPost),
     url('searchCourse',searchCourse),
+<<<<<<< HEAD
+=======
+
+>>>>>>> 755a548947ec8c88462e8a4440f9237f37221de9
 	]
