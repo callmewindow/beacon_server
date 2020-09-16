@@ -314,7 +314,21 @@ def searchPost(request):
         return JsonResponse([],safe=False)
 
 
-
+#删除帖子
+def deletePost(request):   
+    if(request.method!='POST'):
+        return None
+    dict = request.POST
+    postId = dict.get('postId')
+    try:
+        floor = Floor.objects.filter(post_id=postId).delete()
+        post = Post.objects.filter(id=postId).delete()
+        msg = "ok"
+        msg2 = "{\"msg\": \"" + msg + "\"}"
+        return HttpResponse(msg2) 
+    except Exception:
+        res = 'api_ct deletePost error'
+        return HttpResponse(res)
 
 url_ct = [
 	#url('getPostInfo',getPostInfo),
@@ -326,4 +340,5 @@ url_ct = [
     url('cancelStarPost',cancelStarPost),
     url('searchPost',searchPost),
     url('searchCourse',searchCourse),
+    url('deletePost',deletePost),
 	]

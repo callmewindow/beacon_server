@@ -393,13 +393,75 @@ def oneWatch(request):
 		user_course.watch_num += 1
 		user_course.save()
 		msg['result']='OK'
+		return HttpResponse(json_raw(msg))	
+	except:
+		traceback.print_exc()
+		msg['result']='Unexpected Error'
 		return HttpResponse(json_raw(msg))
+def likeFloor(request):
+	try:
+		dict = request.POST
+		msg = {}
 		
+		user_id = dict.get('user_id')
+		floor_id = dict.get('floor_id')
 		
+		if not user_id:
+			msg['result']='用户id不能为空。'
+			return HttpResponse(json_raw(msg))
+		if not floor_id:
+			msg['result']='楼层id不能为空。'
+			return HttpResponse(json_raw(msg))
 		
-			
+		users = Userinfo.objects.filter(id=user_id)
+		if not users:
+			msg['result']='该用户不存在。'
+			return HttpResponse(json_raw(msg))
+		user = users.first()
 		
+		floors = Floor.objects.filter(id=floor_id)
+		if not floors:
+			msg['result']='该楼层不存在。'
+			return HttpResponse(json_raw(msg))
+		floor = floors.first()
+		floor.like_num += 1
+		floor.save()
+		msg['result']='OK'
+		return HttpResponse(json_raw(msg))
+	except:
+		traceback.print_exc()
+		msg['result']='Unexpected Error'
+		return HttpResponse(json_raw(msg))
+def unlikeFloor(request):
+	try:
+		dict = request.POST
+		msg = {}
 		
+		user_id = dict.get('user_id')
+		floor_id = dict.get('floor_id')
+		
+		if not user_id:
+			msg['result']='用户id不能为空。'
+			return HttpResponse(json_raw(msg))
+		if not floor_id:
+			msg['result']='楼层id不能为空。'
+			return HttpResponse(json_raw(msg))
+		
+		users = Userinfo.objects.filter(id=user_id)
+		if not users:
+			msg['result']='该用户不存在。'
+			return HttpResponse(json_raw(msg))
+		user = users.first()
+		
+		floors = Floor.objects.filter(id=floor_id)
+		if not floors:
+			msg['result']='该楼层不存在。'
+			return HttpResponse(json_raw(msg))
+		floor = floors.first()
+		floor.like_num -= 1
+		floor.save()
+		msg['result']='OK'
+		return HttpResponse(json_raw(msg))
 		
 	except:
 		traceback.print_exc()
@@ -415,5 +477,7 @@ url_ztw = [
 	url('getPoint',getPoint),
 	url('userCourse',userCourse),
 	url('getCourseWatches',getCourseWatches),
-	url('oneWatch',oneWatch)
+	url('oneWatch',oneWatch),
+	url('^likeFloor$',likeFloor),
+	url('unlikeFloor',unlikeFloor)
 	]
