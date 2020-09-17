@@ -109,6 +109,12 @@ def cicleAllPost(request):
                 teacher_identity = str(teacher_identity)
             else:
                 teacher_identity = 'null'
+
+            teacher_id = Course.objects.filter(id=i.course_id)[0].teacher_id_id
+            relation = 0
+            if(teacher_id==i.owner_id):
+                relation = 1
+
             floor_1_res = Floor.objects.filter(Q(post_id=i.id) & Q(floor_num =1))
 
 
@@ -139,7 +145,7 @@ def cicleAllPost(request):
                 reply_num = reply_num+1
             reply_num = reply_num-1
                
-            content = {'id':str(i.id), 'title':i.title, 'author':author_name, 'nickname':nickname, 'teacher_identity':teacher_identity, 'datetime':str(datetime), 'content':content, 'read':str(watches), 'like':str(like_num), 'reply_num':reply_num ,'topped':topped ,'stared':stared, 'tag':tag, 'last_time':tmp_list[0]['last_time'], 'last_name':tmp_list[0]['last_name']}
+            content = {'id':str(i.id), 'title':i.title, 'author':author_name, 'nickname':nickname, 'teacher_identity':teacher_identity, 'datetime':str(datetime), 'content':content, 'read':str(watches), 'like':str(like_num), 'reply_num':reply_num ,'topped':topped ,'stared':stared, 'tag':tag, 'relation':relation, 'last_time':tmp_list[0]['last_time'], 'last_name':tmp_list[0]['last_name']}
             post_list.append(content)
         post_list.sort(key=operator.itemgetter('last_time'),reverse=True)
         #msg = "{\"msg\":\"ok\"" + "\"post_list\"" + "\""+ post_list+ "\"" +"}"\
@@ -274,6 +280,13 @@ def searchPost(request):
                 teacher_identity = str(teacher_identity)
             else:
                 teacher_identity = 'null'
+            
+            teacher_id = Course.objects.filter(id=i.course_id)[0].teacher_id_id
+            relation = 0
+            if(teacher_id==i.owner_id):
+                relation = 1
+
+
             floor_1_res = Floor.objects.filter(Q(post_id=i.id) & Q(floor_num =1))
 
 
@@ -304,7 +317,7 @@ def searchPost(request):
                 reply_num = reply_num+1
             reply_num = reply_num-1
                
-            content = {'id':str(i.id), 'title':i.title, 'author':author_name, 'nickname':nickname, 'teacher_identity':teacher_identity, 'datetime':str(datetime), 'content':content, 'read':str(watches), 'like':str(like_num), 'reply_num':reply_num ,'topped':topped ,'stared':stared,'tag':tag,'last_time':tmp_list[0]['last_time'], 'last_name':tmp_list[0]['last_name']}
+            content = {'id':str(i.id), 'title':i.title, 'author':author_name, 'nickname':nickname, 'teacher_identity':teacher_identity, 'datetime':str(datetime), 'content':content, 'read':str(watches), 'like':str(like_num), 'reply_num':reply_num ,'topped':topped ,'stared':stared,'tag':tag,'relation':relation,'last_time':tmp_list[0]['last_time'], 'last_name':tmp_list[0]['last_name']}
             post_list.append(content)
         post_list.sort(key=operator.itemgetter('last_time'),reverse=True)
         #msg = "{\"msg\":\"ok\"" + "\"post_list\"" + "\""+ post_list+ "\"" +"}"\

@@ -10,6 +10,7 @@ from moviepy.editor import VideoFileClip
 from django.conf.urls import url
 import xlrd
 import xlwt
+import traceback
 
 
 def createCourse(request):
@@ -26,12 +27,6 @@ def createCourse(request):
     # end_time = dict['end_time']
     # profession = dict['profession']
 
-    # msg = str(type(request.POST))
-    # res = "{\"msg\": \"" + request.POST + "\"}"
-    # return HttpResponse(res)
-    # dict=request.POST.get('courseEntity')
-    # res = "{\"msg\": \"" + str(type(dict)) + "\"}"
-    # return HttpResponse(res)
     dict = request.POST
     print(dict)
     course_name=dict.get('course_name')
@@ -40,22 +35,6 @@ def createCourse(request):
     start_time=dict.get('start_time')
     end_time=dict.get('end_time')
     profession=dict.get('profession')
-
-    # if course_name is None or course_intro is None or start_time is None or end_time is None or profession is None:
-    #     msg = 'empty input'
-    #     res = "{\"msg\": \"" + msg + "\"}"
-    #     return HttpResponse(res)
-
-    # try:
-    #     result = Course.objects.filter(course_name=course_name)
-    # except Exception:
-    #     msg = 'database search course_name in Course error'
-    #     res = "{\"msg\": \"" + msg + "\"}"
-    #     return HttpResponse(res)
-    # if result:
-    #     msg = 'course_name exit'
-    #     res = "{\"msg\": \"" + msg + "\"}"
-    #     return HttpResponse(res)
 
     course=Course()
     course.course_name=course_name
@@ -78,105 +57,6 @@ def createCourse(request):
 
 
 
-# def uploadVideo(request):
-#     if (request.method != 'POST'):
-#         msg = 'fail'
-#         res = "{\"msg\": \"" + msg + "\"}"
-#         return HttpResponse(res)
-#
-#     # video_file = request.FILES.get('video')
-#     # if video_file:
-#     #     msg = 'success'
-#     #     res = "{\"msg\": \"" + msg + "\"}"
-#     #     return HttpResponse(res)
-#     # else:
-#     #     msg = 'fail'
-#     #     res = "{\"msg\": \"" + msg + "\"}"
-#     #     return HttpResponse(res)
-#
-#
-#     # temp4 = eval(str(request.body)[1:])
-#     # dict = json.loads(temp4)['videoEntity']
-#     # title = dict['title']
-#     # introduction = dict['introduction']
-#     # course_id = dict['course_id']
-#     # upload_time = dict['upload_time']
-#     # video_file = request.FILES.get('video')
-#
-#     dict = request.POST
-#     title = dict.get('title')
-#     introduction = dict.get('introduction')
-#     # video_duration = dict.get('video_duration')
-#     # course_name = dict.get('course_name')
-#     course_id = dict.get('course_id')
-#     upload_time = dict.get('upload_time')
-#     video_file = request.FILES.get('file')
-#     print(title)
-#     print(introduction)
-#     print(course_id)
-#     print(upload_time)
-#     print(video_file)
-#     print(request)
-#     print(request.POST)
-#     print(request.FILES)
-#     # return HttpResponse(title)
-#
-#     if title is None or introduction is None or course_id is None or upload_time is None :
-#         msg = 'empty input'
-#         res = "{\"msg\": \"" + msg + "\"}"
-#         return HttpResponse(res)
-#
-#     try:
-#         result = Videos.objects.filter(title = title)
-#     except Exception:
-#         msg = 'database search video in Vedios error'
-#         res = "{\"msg\": \"" + msg + "\"}"
-#         return HttpResponse(res)
-#     if result:
-#         msg = 'video title exit'
-#         res = "{\"msg\": \"" + msg + "\"}"
-#         return HttpResponse(res)
-#
-#     video = Videos()
-#     video.title = title
-#     video.introduction = introduction
-#     video.upload_time = datetime.datetime.strptime(upload_time, '%Y-%m-%d %H:%M:%S')
-#
-#     try:
-#         course = Course.objects.filter(id = course_id)
-#     except Exception:
-#         msg = 'database search course_name in Course error'
-#         res = "{\"msg\": \"" + msg + "\"}"
-#         return HttpResponse(res)
-#     if not course:
-#         msg = 'course do not exit'
-#         res = "{\"msg\": \"" + msg + "\"}"
-#         return HttpResponse(res)
-#     video.course_id = course_id
-#
-#     video_name = title + '.mp4'
-#     video_path = os.path.join('/beacon/media', video_name)
-#     f = open(video_path, 'wb')
-#     for i in video_file.chunks():
-#         f.write(i)
-#     f.close()
-#     video.local_address = '/beacon/media/' + video_name
-#
-#     clip = VideoFileClip('/beacon/media/' + video_name)
-#     video.video_duration = clip.duration
-#
-#     try:
-#         video.save()
-#     except Exception:
-#         msg = 'database save video error'
-#         res = "{\"msg\": \"" + msg + "\"}"
-#         return HttpResponse(res)
-#
-#     msg = 'success'
-#     res = "{\"msg\": \"" + msg + "\"}"
-#     return HttpResponse(res)
-
-
 def uploadVideo1(request):
     if (request.method != 'POST'):
         msg = 'fail'
@@ -184,10 +64,8 @@ def uploadVideo1(request):
         return HttpResponse(res)
 
     video_file = request.FILES.get('file')
-    # course_id = request.FILES.get('file').name
     print(video_file)
     print(request)
-    # return HttpResponse(title)
 
     if video_file is None :
         msg = 'empty input1'
@@ -195,18 +73,6 @@ def uploadVideo1(request):
         return HttpResponse(res)
 
     video = Videos()
-    #
-    # try:
-    #     course = Course.objects.filter(id = course_id)
-    # except Exception:
-    #     msg = 'database search course_name in Course error'
-    #     res = "{\"msg\": \"" + msg + "\"}"
-    #     return HttpResponse(res)
-    # if not course:
-    #     msg = 'course do not exit'
-    #     res = "{\"msg\": \"" + msg + "\"}"
-    #     return HttpResponse(res)
-    # video.course_id = course_id
 
     video_name = datetime.datetime.now().strftime("%m%d%H%M%S") + '.mp4'
     video_path = os.path.join('/beacon/media', video_name)
@@ -302,7 +168,6 @@ def uploadVideo2(request):
 
 
 
-
 # 每行依次是，学校，学号，真实姓名，邮箱
 def uploadUserCourse1(request):
     if (request.method != 'POST'):
@@ -311,24 +176,11 @@ def uploadUserCourse1(request):
         return HttpResponse(res)
     excel_file = request.FILES.get('file')
     excel_name = request.FILES.get('file').name
-    # course_name = request.POST.get('course_name')
-    # course_id = request.POST.get('course_id')
-    # print(request)
-    # print(request.FILES)
-    # print(request.FILES.get('file'))
-    # print(request.FILES.get('file').name)
-    # print(request.POST)
-    # print(request.POST.get('file'))
 
     if excel_file is None:
         msg = 'empty input'
         res = "{\"msg\": \"" + msg + "\"}"
         return HttpResponse(res)
-
-    # if not csv_file.name.endswith('.csv'):
-    #     msg = 'file is not csv type'
-    #     res = "{\"msg\": \"" + msg + "\"}"
-    #     return HttpResponse(res)
 
     excel_path = os.path.join('/beacon/excel', excel_name)
     f = open(excel_path, 'wb')
@@ -347,14 +199,8 @@ def uploadUserCourse2(request):
     course_id = int(request.POST.get('course_id'))
     excel_name = request.POST.get('excel_name')
 
-    print(type(course_id))
-    print(course_id)
-    print(excel_name)
     if course_id is None or excel_name is None:
         return HttpResponse("empty input")
-
-    # print(os.path.join("/beacon/excel", excel_name))
-    # print(excel_name)
 
     excel_path = os.path.join('/beacon/excel', excel_name)
     try:
@@ -371,8 +217,6 @@ def uploadUserCourse2(request):
     # user_id_list = []
     for i in range(1, sheet.nrows):
         row_value = sheet.row_values(i)
-        print(row_value)
-        print(row_value[0])
         email = row_value[3]
 
         try:
@@ -385,19 +229,18 @@ def uploadUserCourse2(request):
             userinfo = Userinfo()
             userinfo.username = row_value[3]
             userinfo.school = row_value[0]
-            userinfo.school_id = row_value[1]
+            userinfo.school_id = str(int(row_value[1]))
             userinfo.realname = row_value[2]
             userinfo.email = row_value[3]
+            userinfo.user_password = 'beacon123'
             try:
                 userinfo.save()
             except Exception:
                 msg = 'database save userInfo error'
                 res = "{\"msg\": \"" + msg + "\"}"
                 return HttpResponse(res)
-        # user = UserCourse.objects.filter(realname=realname)
-        # return HttpResponse(user + user.first())
         else:
-            if user.school is not row_value[0] or user.school_id is not row_value[1] or user.realname is not row_value[2]:
+            if user.school != row_value[0] or user.school_id != str(int(row_value[1])) or user.realname != row_value[2]:
                 continue
 
         try:
@@ -407,23 +250,6 @@ def uploadUserCourse2(request):
             res = "{\"msg\": \"" + msg + "\"}"
             return HttpResponse(res)
         user_id = userInUserinfo.id
-        # try:
-        #     userInUserCourse = UserCourse.objects.filter(user_id=user_id).first()
-        # except Exception:
-        #     msg = 'database search realname in UserCourse error'
-        #     res = "{\"msg\": \"" + msg + "\"}"
-        #     return HttpResponse(res)
-        # if not userInUserCourse:
-        #     userCourse = UserCourse()
-        #     userCourse.user_id = user_id
-        #     userCourse.user_identity = 0  # 每日任务-共享信息
-        #     try:
-        #         userCourse.save()
-        #     except Exception:
-        #         msg = 'database save userCourse error'
-        #         res = "{\"msg\": \"" + msg + "\"}"
-        #         return HttpResponse(res)
-        # user_id_list.append(user_id)
 
         try:
             userInUserCourse = UserCourse.objects.filter(user_id=user_id, course_id=course_id).first()
@@ -443,119 +269,11 @@ def uploadUserCourse2(request):
                 res = "{\"msg\": \"" + msg + "\"}"
                 return HttpResponse(res)
 
-    # file_data = csv_file.read().decode('gb2312', 'ignore')
-    # lines = file_data.split('\n')
-    # i=0
-    # for line in lines[1:]:
-    #     fields = line.split(',')
-    #     realname = fields[2]
-    #
-    #     try:
-    #         user = Userinfo.objects.filter(realname = realname)
-    #     except Exception:
-    #         msg = 'database search realname in UserInfo error'
-    #         res = "{\"msg\": \"" + msg + "\"}"
-    #         return HttpResponse(res)
-    #     if not user:
-    #         userInfo = Userinfo()
-    #         userInfo.school = fields[0]
-    #         userInfo.school_id = fields[1]
-    #         userInfo.realname = fields[2]
-    #         userInfo.email = fields[3]
-    #         print(fields[0])
-    #         print(fields[1])
-    #         print(fields[2])
-    #         print(fields[3])
-    #         print(userInfo.school)
-    #         print(userInfo.school_id)
-    #         print(userInfo.realname)
-    #         print(userInfo.email)
-    #         # try:
-    #         #     userInfo.save()
-    #         # except Exception:
-    #         #     msg = 'database save userInfo error' + str(i)
-    #         #     res = "{\"msg\": \"" + msg + "\"}"
-    #         #     # res = fields[0]
-    #         #     return HttpResponse(res)
-    #         userInfo.save()
-    #     # user = UserCourse.objects.filter(realname=realname)
-    #     # return HttpResponse(user + user.first())
-    #     try:
-    #         userInUserinfo = Userinfo.objects.filter(realname = realname).first()
-    #     except Exception:
-    #         msg = 'database search realname in Userinfo error'
-    #         res = "{\"msg\": \"" + msg + "\"}"
-    #         return HttpResponse(res)
-    #     user_id = userInUserinfo.id
-    #     try:
-    #         userInUserCourse = UserCourse.objects.filter(user_id = user_id).first()
-    #     except Exception:
-    #         msg = 'database search realname in UserCourse error'
-    #         res = "{\"msg\": \"" + msg + "\"}"
-    #         return HttpResponse(res)
-    #     if not userInUserCourse:
-    #         userCourse = UserCourse()
-    #         userCourse.user_id = user_id
-    #         userCourse.course_id = course_id
-    #         userCourse.user_identity = 0 #每日任务-共享信息
-    #         try:
-    #             userCourse.save()
-    #         except Exception:
-    #             msg = 'database save userCourse error'
-    #             res = "{\"msg\": \"" + msg + "\"}"
-    #             return HttpResponse(res)
-    #
-    #     i = i + 1
-
     os.remove(excel_path)
 
     msg = 'success'
     res = "{\"msg\": \"" + msg + "\"}"
     return HttpResponse(res)
-
-
-
-# def uploadUserCourse2(request):
-#     if (request.method != 'POST'):
-#         msg = 'fail'
-#         res = "{\"msg\": \"" + msg + "\"}"
-#         return HttpResponse(res)
-#     user_id_list = request.POST.get('user_id_list')
-#     course_id = request.POST.get('course_id')
-#
-#     for user_id in user_id_list:
-#         try:
-#             userInUserCourse = UserCourse.objects.filter(user_id=user_id, course_id=course_id).first()
-#         except Exception:
-#             msg = 'database search user_id and course_id in UserCourse error'
-#             res = "{\"msg\": \"" + msg + "\"}"
-#             return HttpResponse(res)
-#         if not userInUserCourse:
-#             userCourse = UserCourse()
-#             userCourse.user_id = user_id
-#             userCourse.course_id = course_id
-#             userCourse.user_identity = 0  # 每日任务-共享信息
-#             try:
-#                 userCourse.save()
-#             except Exception:
-#                 msg = 'database save userCourse error1'
-#                 res = "{\"msg\": \"" + msg + "\"}"
-#                 return HttpResponse(res)
-#         else:
-#             if userInUserCourse.course_id is not course_id or
-#             userInUserCourse.course_id = course_id
-#             try:
-#                 userInUserCourse.save()
-#             except Exception:
-#                 msg = 'database save userCourse error2'
-#                 res = "{\"msg\": \"" + msg + "\"}"
-#                 return HttpResponse(res)
-#
-#     return HttpResponse('tmp_return')
-
-
-
-# 查看并发送好友私信：作为平台用户，我希望和已经是好友的平台成员发送私信并看到对方的。————维护消息数据表
 
 
 
@@ -608,10 +326,7 @@ def getPrivateMessages(request):
             return HttpResponse(res)
         else:
             result = sorted(result, key=lambda keys: keys['send_time'])
-            # result.sort(key=send_time)
-            # res = "{\"result\":" + str(result) + "}"
-            # return HttpResponse(res)
-            return HttpResponse(json.dumps(result))
+            return HttpResponse(json.dumps(result, ensure_ascii=False))
     else:
         for privateMessage in privateMessages2:
             send_time = datetime.datetime.strftime(privateMessage.send_time, '%Y-%m-%d %H:%M:%S')
@@ -624,41 +339,7 @@ def getPrivateMessages(request):
             privateMessage.save()
             print(result)
         result = sorted(result, key=lambda keys: keys['send_time'])
-        # result.sort(key=send_time)
-        # res = "{\"result\":" + str(result) + "}"
-        # return HttpResponse(res)
         return HttpResponse(json.dumps(result))
-
-
-
-# def getPrivateMessage(request):
-#     if (request.method != 'POST'):
-#         msg = 'fail'
-#         res = "{\"msg\": \"" + msg + "\"}"
-#         return HttpResponse(res)
-#     dict = request.POST
-#     sender_id = dict.get('sender_id')
-#     receiver_id = dict.get('receiver_id')
-#     send_time = dict.get('send_time')
-#
-#     if sender_id is None or receiver_id is None or send_time is None:
-#         msg = 'empty input'
-#         res = "{\"msg\": \"" + msg + "\"}"
-#         return HttpResponse(res)
-#
-#     try:
-#         privateMessage = PrivateMessage.objects.filter(sender=sender_id, receiver=receiver_id, send_time=send_time)
-#     except:
-#         msg = 'database search sender_id, receiver_id and send_time in PrivateMessage error'
-#         res = "{\"msg\": \"" + msg + "\"}"
-#         return HttpResponse(res)
-#     if not privateMessage:
-#         msg = 'privateMessage do not exist'
-#         res = "{\"msg\": \"" + msg + "\"}"
-#         return HttpResponse(res)
-#     content = privateMessage.content
-#
-#     return HttpResponse(content)
 
 
 
@@ -697,14 +378,209 @@ def postPrivateMessage(request):
 
 
 
-def sendFriendApplication(request):
-    if (request.method != 'POST'):
-        msg = 'fail'
-        res = "{\"msg\": \"" + msg + "\"}"
-        return HttpResponse(res)
-    dict = request.POST
-    
+def json_raw(dict):
+	return str(dict).replace('\'','\"').replace('None','null')
 
+def sendFriendApplication(request):
+    try:
+        msg = {}
+        if (request.method != 'POST'):
+            msg['result'] = 'not post'
+            return HttpResponse(json_raw(msg))
+        dict = request.POST
+        applicant_id = dict.get('applicant_id')
+        target_id = dict.get('target_id')
+        application_content = dict.get('application_content') # spell correctly
+        application_time = dict.get('application_time')
+
+        if applicant_id is None:
+            msg['result'] = 'empty applicant_id'
+            return HttpResponse(json_raw(msg))
+        if target_id is None:
+            msg['result'] = 'empty target_id'
+            return HttpResponse(json_raw(msg))
+        if application_content is None:
+            msg['result'] = 'empty application_content'
+            return HttpResponse(json_raw(msg))
+        if application_time is None:
+            msg['result'] = 'empty application time'
+            return HttpResponse(json_raw(msg))
+
+        friendApplication = FriendApplication.objects.filter(applicant_id=applicant_id, target_id=target_id)
+        if friendApplication:
+            msg['result'] = 'already applied'
+            return HttpResponse(json_raw(msg))
+        friendApplication = FriendApplication()
+        friendApplication.applicant_id = applicant_id
+        friendApplication.target_id = target_id
+        friendApplication.application_content = application_content
+        friendApplication.application_time = datetime.datetime.strptime(application_time, '%Y-%m-%d %H:%M:%S')
+        friendApplication.save()
+        msg['result'] = 'success'
+        return HttpResponse(json_raw(msg))
+    except:
+        traceback.print_exc()
+        msg['result'] = 'Unexpected Error'
+        return HttpResponse(json_raw(msg))
+
+
+
+def passFriendApplication(request):
+    try:
+        msg = {}
+        if (request.method != 'POST'):
+            msg['result'] = 'not post'
+            return HttpResponse(json_raw(msg))
+        dict = request.POST
+        applicant_id = dict.get('applicant_id')
+        target_id = dict.get('target_id')
+
+        if applicant_id is None:
+            msg['result'] = 'empty applicant_id'
+            return HttpResponse(json_raw(msg))
+        if target_id is None:
+            msg['result'] = 'empty target_id'
+            return HttpResponse(json_raw(msg))
+
+        friendApplication = FriendApplication.objects.filter(applicant_id=applicant_id, target_id=target_id).first()
+        if not friendApplication:
+            msg['result'] = 'no friend application'
+            return HttpResponse(json_raw(msg))
+        friendApplication.result = 1
+        friendApplication.save()
+        msg['result'] = 'success'
+        return HttpResponse(json_raw(msg))
+    except:
+        traceback.print_exc()
+        msg['result'] = 'Unexpected Error'
+        return HttpResponse(json_raw(msg))
+
+
+
+def rejectFriendApplication(request):
+    try:
+        msg = {}
+        if (request.method != 'POST'):
+            msg['result'] = 'not post'
+            return HttpResponse(json_raw(msg))
+        dict = request.POST
+        applicant_id = dict.get('applicant_id')
+        target_id = dict.get('target_id')
+
+        if applicant_id is None:
+            msg['result'] = 'empty applicant_id'
+            return HttpResponse(json_raw(msg))
+        if target_id is None:
+            msg['result'] = 'empty target_id'
+            return HttpResponse(json_raw(msg))
+
+        friendApplication = FriendApplication.objects.filter(applicant_id=applicant_id, target_id=target_id).first()
+        if not friendApplication:
+            msg['result'] = 'no friend application'
+            return HttpResponse(json_raw(msg))
+        friendApplication.result = 2
+        friendApplication.save()
+        msg['result'] = 'success'
+        return HttpResponse(json_raw(msg))
+    except:
+        traceback.print_exc()
+        msg['result'] = 'Unexpected Error'
+        return HttpResponse(json_raw(msg))
+
+
+
+def getFriendApplicationOfYourself(request):
+    try:
+        msg = {}
+        if (request.method != 'POST'):
+            msg['result'] = 'not post'
+            return HttpResponse(json_raw(msg))
+        dict = request.POST
+        applicant_id = dict.get('applicant_id')
+
+        if applicant_id is None:
+            msg['result'] = 'empty applicant_id'
+            return HttpResponse(json_raw(msg))
+
+        friendApplications = FriendApplication.objects.filter(applicant_id=applicant_id)
+        if not friendApplications:
+            msg['result'] = 'no friend application'
+            return HttpResponse(json_raw(msg))
+        applications = []
+        for friendApplication in friendApplications:
+            one_application = {}
+            one_application['application_content'] = friendApplication.application_content
+            one_application['application_time'] = datetime.datetime.strftime(friendApplication.application_time, '%Y-%m-%d %H:%M:%S')
+            one_application['result'] = friendApplication.result
+            applications.append(one_application)
+        return HttpResponse(json.dumps(applications, ensure_ascii=False))
+    except:
+        traceback.print_exc()
+        msg['result'] = 'Unexpected Error'
+        return HttpResponse(json_raw(msg))
+
+
+
+def getFriendApplicationOfOthers(request):
+    try:
+        msg = {}
+        if (request.method != 'POST'):
+            msg['result'] = 'not post'
+            return HttpResponse(json_raw(msg))
+        dict = request.POST
+        target_id = dict.get('target_id')
+
+        if target_id is None:
+            msg['result'] = 'empty target_id'
+            return HttpResponse(json_raw(msg))
+
+        friendApplications = FriendApplication.objects.filter(target_id=target_id)
+        if not friendApplications:
+            msg['result'] = 'no friend application'
+            return HttpResponse(json_raw(msg))
+        applications = []
+        for friendApplication in friendApplications:
+            one_application = {}
+            one_application['application_content'] = friendApplication.application_content
+            one_application['application_time'] = datetime.datetime.strftime(friendApplication.application_time, '%Y-%m-%d %H:%M:%S')
+            one_application['result'] = friendApplication.result
+            applications.append(one_application)
+        return HttpResponse(json.dumps(applications, ensure_ascii=False))
+    except:
+        traceback.print_exc()
+        msg['result'] = 'Unexpected Error'
+        return HttpResponse(json_raw(msg))
+
+
+
+def deleteFriendRecord(request):
+    try:
+        msg = {}
+        if (request.method != 'POST'):
+            msg['result'] = 'not post'
+            return HttpResponse(json_raw(msg))
+        dict = request.POST
+        user1_id = dict.get('user1_id')
+        user2_id = dict.get('user2_id')
+
+        if user1_id is None:
+            msg['result'] = 'empty user1_id'
+            return HttpResponse(json_raw(msg))
+        if user2_id is None:
+            msg['result'] = 'empty user2_id'
+            return HttpResponse(json_raw(msg))
+
+        friendRecord = FriendRecord.objects.filter(user1_id=user1_id, user2_id=user2_id)
+        if not friendRecord:
+            msg['result'] = 'empty friend record'
+            return HttpResponse(json_raw(msg))
+        FriendRecord.objects.filter(user1_id=user1_id, user2_id=user2_id).delete()
+        msg['result'] = 'success'
+        return HttpResponse(json_raw(msg))
+    except:
+        traceback.print_exc()
+        msg['result'] = 'Unexpected Error'
+        return HttpResponse(json_raw(msg))
 
 
 
@@ -720,4 +596,9 @@ url_zzc = [
     # url('getPrivateMessage', getPrivateMessage),
     url('postPrivateMessage', postPrivateMessage),
     url('sendFriendApplication', sendFriendApplication),
+    url('passFriendApplication', passFriendApplication),
+    url('rejectFriendApplication', rejectFriendApplication),
+    url('getFriendApplicationOfYourself', getFriendApplicationOfYourself),
+    url('getFriendApplicationOfOthers', getFriendApplicationOfOthers),
+    url('deleteFriendRecord', deleteFriendRecord),
 ]
