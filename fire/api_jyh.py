@@ -169,7 +169,7 @@ def getClassBasicInfo(request):
         res = '{"message":' + '"' + msg + '"' +'}'
         return HttpResponse(res)
     
-    teacher_name = teacher.username
+    teacher_name = teacher.realname
     teacher_university = teacher.school
     teacher_profession = teacher.profession
     teacher_email = teacher.email
