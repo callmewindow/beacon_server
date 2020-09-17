@@ -343,6 +343,58 @@ def deletePost(request):
         res = 'api_ct deletePost error'
         return HttpResponse(res)
 
+
+#检索教师
+def searchTeacher(request):
+    if(request.method!='POST'):
+        return None
+    dict = request.POST
+    keyWord = dict.get('keyWord')
+    res = Userinfo.objects.filter(Q(realname__contains=keyWord) & Q(teacher_identity =1))
+    if res:
+        teacher_list = []
+        for i in res:
+            id = i.id
+            username = i.username
+            user_nickname = i.user_nickname
+            if not user_nickname:
+                user_nickname = 'null'
+            introduction = i.introduction
+            if not introduction:
+                introduction = 'null'
+            phonenumber = i.phonenumber
+            if not phonenumber:
+                phonenumber = 'null'
+            email = i.email
+            if not email:
+                email = 'null'
+            qq = i.qq
+            if not qq:
+                qq = 'null'
+            teacher_identity = i.teacher_identity
+            if not teacher_identity:
+                teacher_identity = 'null'
+            school = i.school
+            if not school:
+                school = 'null'
+            school_id = i.school_id
+            if not school_id:
+                school_id = 'null'
+            realname = i.realname
+            if not realname:
+                realname = 'null'
+            profession = i.profession
+            if not profession:
+                profession = 'null'
+            content = {'id':id, 'username':username, 'user_nickname':user_nickname, 'introduction':introduction, 'phonenumber':phonenumber, 'email':email, 'qq':qq, 'teacher_identity':teacher_identity, 'school':school, 'school_id':school_id, 'realname':realname, 'profession':profession}
+            teacher_list.append(content)
+        return JsonResponse(teacher_list,safe=False)
+    else:
+        return JsonResponse([],safe=False)
+
+
+
+
 url_ct = [
 	#url('getPostInfo',getPostInfo),
     url('replyPost',replyPost),
@@ -354,4 +406,5 @@ url_ct = [
     url('searchPost',searchPost),
     url('searchCourse',searchCourse),
     url('deletePost',deletePost),
+    url('searchTeacher',searchTeacher),
 	]
