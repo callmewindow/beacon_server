@@ -171,11 +171,15 @@ def getClassBasicInfo(request):
     
     teacher_name = teacher.username
     teacher_university = teacher.school
+    teacher_profession = teacher.profession
+    teacher_email = teacher.email
 
     send_teacher = {}
     send_teacher["teacher_id"] = teacher_id
     send_teacher["teacher_name"] = teacher_name
     send_teacher["teacher_university"] = teacher_university
+    send_teacher["teacher_profession"] = teacher_profession
+    send_teacher["teacher_email"] = teacher_email
 
     #检查一下关系
     relation = -1
@@ -626,16 +630,200 @@ def updateUser(request):
 
     return HttpResponse(res)
 
+def searchFriend(request):
+    if(request.method != 'GET'): 
+        msg = '需要GET请求'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    
+    user_id = request.GET.get("user_id", -1)
+    if(user_id == -1):
+        msg = '需要用户id'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+
+    #判断是不是存在
+    try:
+        Userinfo.objects.get(id=user_id)
+    except Exception as e:
+        msg = '用户id不存在'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+
+    send_user = []
+
+    friend1 = FriendRecord.objects.filter(user1_id=user_id)
+    for f in friend1:
+        #查表找信息
+        user = Userinfo.objects.get(id=f.user2_id)
+        send_uu = {}
+        send_uu["username"] = user.username
+        send_uu["user_password"] = user.user_password
+        send_uu["user_nickname"] = user.user_nickname
+        send_uu["introduction"] = user.introduction
+        send_uu["user_password"] = user.user_password
+        send_uu["phonenumber"] = user.phonenumber
+        send_uu["email"] = user.email
+        send_uu["qq"] = user.qq
+        send_uu["teacher_identity"] = user.teacher_identity
+        send_uu["school"] = user.school
+        send_uu["school_id"] = user.school_id
+        send_uu["realname"] = user.realname
+        send_uu["profession"] = user.profession
+
+        #查找他们最后的聊天记录
+        last_message = None
+        l_message = {}
+        try:
+            last_message = PrivateMessage.objects.filter(receiver_id=user_id, sender_id=user.id).order_by('-send_time')[0]
+        except Exception as identifier:
+            pass
+        else:
+            l_message["content"] = last_message.content
+            l_message["send_time"] = last_message.send_time
+            l_message["is_read"] = last_message.is_read
+            l_message["receiver_id"] = last_message.receiver_id
+            l_message["sender_id"] = last_message.sender_id
+
+        send_uu["last_message"] = l_message
+
+        send_user += [send_uu]
+
+    friend2 = FriendRecord.objects.filter(user2_id=user_id)
+    for f in friend2:
+        #查表找信息
+        user = Userinfo.objects.get(id=f.user1_id)
+        send_uu = {}
+        send_uu["username"] = user.username
+        send_uu["user_password"] = user.user_password
+        send_uu["user_nickname"] = user.user_nickname
+        send_uu["introduction"] = user.introduction
+        send_uu["user_password"] = user.user_password
+        send_uu["phonenumber"] = user.phonenumber
+        send_uu["email"] = user.email
+        send_uu["qq"] = user.qq
+        send_uu["teacher_identity"] = user.teacher_identity
+        send_uu["school"] = user.school
+        send_uu["school_id"] = user.school_id
+        send_uu["realname"] = user.realname
+        send_uu["profession"] = user.profession
+
+        #查找他们最后的聊天记录
+        last_message = None
+        l_message = {}
+        try:
+            last_message = PrivateMessage.objects.filter(receiver_id=user_id, sender_id=user.id).order_by('-send_time')[0]
+        except Exception as identifier:
+            pass
+        else:
+            l_message["content"] = last_message.content
+            l_message["send_time"] = last_message.send_time
+            l_message["is_read"] = last_message.is_read
+            l_message["receiver_id"] = last_message.receiver_id
+            l_message["sender_id"] = last_message.sender_id
+
+        send_uu["last_message"] = l_message
+
+        send_user += [send_uu]
+
+    
+
+
+    send = {}
+    send["message"] = 'success'
+    send["users"] = send_user
+    return JsonResponse(send, safe=False)
+
+def updateVideo(request):
+    if(request.method != 'POST'): 
+        msg = '需要POST请求'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    
+    video_id = request.POST.get("video_id", -1)
+    if(video_id == -1):
+        msg = '需要视频id'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+
+    #尝试找一下视频
+    video = None
+    try:
+        video = Videos.objects.get(id=video_id)
+    except Exception as e:
+        msg = '视频id不合法'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+
+    #以下为非必须
+    title = request.POST.get("title", -1)
+    if(title != -1 and type(title) != type("")):
+        msg = 'title数据类型错误'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    if(title != -1):
+        video.title = title
+    
+    introduction = request.POST.get("introduction", -1)
+    if(introduction != -1 and type(introduction) != type("")):
+        msg = 'introduction数据类型错误'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    if(introduction != -1):
+        video.introduction = introduction
+
+    video.save()
+    
+    msg = 'success'
+    res = '{"message":' + '"' + msg + '"' +'}'
+    return HttpResponse(res)
+
+def deleteVideo(request):
+    if(request.method != 'GET'): 
+        msg = '需要GET请求'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+    
+    video_id = request.GET.get("video_id", -1)
+    if(video_id == -1):
+        msg = '需要视频id'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+
+    #先看看有没有这条记录
+    video = None
+    try:
+        video = Videos.objects.get(id=video_id)
+    except Exception as e:
+        msg = '找不到该视频'
+        res = '{"message":' + '"' + msg + '"' +'}'
+        return HttpResponse(res)
+
+    video.delete()
+    msg = 'success'
+    res = '{"message":' + '"' + msg + '"' +'}'
+    return HttpResponse(res)
+
 url_jyh = [
     url(r'video/play/', getVideo),
+    url(r'video/manage/update', updateVideo),
+    url(r'video/manage/delete', deleteVideo),
+
     url(r'circle/open/', openCircle),
     url(r'circle/close/', closeCircle),
+
     url(r'info/basic/class/', getClassBasicInfo),
+
     url(r'student/manage/authorize/', authorizeStudent),
     url(r'student/manage/search/', searchStudent),
     url(r'student/manage/add/', addStudent),    
     url(r'student/manage/del/', delStudent),    
     url(r'student/manage/update/', updateStudent),
+
     url(r'class/application/create/', createCourseApplication),
-    url(r'user/manage/update/', updateUser)
+
+    url(r'user/manage/update/', updateUser),
+
+    url(r'friend/search/', searchFriend),
+    
 ]
