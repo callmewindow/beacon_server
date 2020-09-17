@@ -147,7 +147,7 @@ class SystemMessage(models.Model):
     target = models.ForeignKey('Userinfo', on_delete=models.CASCADE, blank=True, null=True)
     message_title = models.CharField(max_length=200, blank=True, null=True)
     message_content = models.CharField(max_length=200, blank=True, null=True)
-    is_read = models.IntegerField(blank=True, null=True)
+    is_read = models.IntegerField(blank=True, default=0)
     send_time = models.DateTimeField(blank=True, null=True)
 
     class Meta:

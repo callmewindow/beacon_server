@@ -46,19 +46,16 @@ def get_course_by_userid(request):
 				return JsonResponse(msg, safe=False)
 			else:
 				course_dict = model_to_dict(course_model.first())
-				course_name = course_dict.get('course_name', None)
-				course_intro = course_dict.get('course_intro', None)
-				start_time = course_dict.get('start_time', None)
-				profession = course_dict.get('profession', None)
-				teachername = course_dict.get('teacher_name', None)
+				teacherid = course_dict.get('teacher_id', None)
 				studentnum = UserCourse.objects.filter(course=model['course']).count()
 				course = {
-					"course_name": course_name,
-					"course_intro": course_intro,
-					"start_time": start_time,
-					"profession": profession,
+					"course_id": course_dict.get('id', None),
+					"course_name": course_dict.get('course_name', None),
+					"course_intro": course_dict.get('course_intro', None),
+					"start_time": course_dict.get('start_time', None),
+					"profession": course_dict.get('profession', None),
 					"studentnum": studentnum,
-					"teachername": teachername
+					"teacherid": teacherid
 				}
 				courses.append(course)
 
@@ -96,11 +93,11 @@ def get_userinfo_by_userid(request):
 					course_point_together += point
 			user = {
 				"username": user_dict.get('username', None),
-				"teacher identity": user_dict.get('teacher_identity', None),
+				"teacher_identity": user_dict.get('teacher_identity', None),
 				"school": user_dict.get('school', None),
 				"profession": user_dict.get('profession', None),
-				"course number": course_num,
-				"school id": user_dict.get('school_id', None),
+				"course_number": course_num,
+				"school_id": user_dict.get('school_id', None),
 				"coursetime": course_time,
 				"score": course_point_together,
 				"nickname": user_dict.get('user_nickname', None),
@@ -296,6 +293,101 @@ def get_courses_in_possession(request):
 		msg['message'] = 'Unexpected Error'
 		return JsonResponse(msg, safe=False)
 
+
+def get_applications_by_user_id(request):
+	try:
+		dict = request.GET
+		msg = {}
+		msg['message'] = ''
+		userid = dict.get('user_id', None)
+		if userid == None:
+			msg['message'] = '用户id不能为空。'
+			return JsonResponse(msg, safe=False)
+
+		list = Course.objects.filter(teacher_id=userid)
+		unhandled = []
+		accepted = []
+		rejected = []
+		if list:
+			for i in list:
+				app_list = CourseApplication.objects.filter(course=i.id)
+				if app_list:
+					for j in app_list:
+						app = model_to_dict(j)
+						type = app.get('result', None)
+						if type == 0:
+							unhandled.append(app)
+						elif type == 1:
+							accepted.append(app)
+						elif type == 2:
+							rejected.append(app)
+						else:
+							msg['message'] = '未知类型的申请结果。'
+							return JsonResponse(msg, safe=False)
+				else:
+					msg['message'] = '课程不存在。'
+					return JsonResponse(msg, safe=False)
+			msg['unhandled_applications'] = unhandled
+			msg['accepted_applications'] = accepted
+			msg['rejected_applications'] = rejected
+			msg['message'] = 'OK'
+			return JsonResponse(msg, safe=False)
+		else:
+			msg['message'] = '该用户尚未创建任何课程。'
+			return JsonResponse(msg, safe=False)
+	except:
+		traceback.print_exc()
+		msg['message'] = 'Unexpected Error'
+		return JsonResponse(msg, safe=False)
+
+def send_system_message(request):
+	try:
+		dict = request.GET
+		msg = {}
+		msg['message'] = ''
+		user_id = dict.get('user_id', None)
+		if user_id == None:
+			msg['message'] = '申请id不能为空。'
+			return JsonResponse(msg, safe=False)
+		title = dict.get('title', None)
+		content = dict.get('content', None)
+		if content == None:
+			msg['message'] = '消息不能为空。'
+			return JsonResponse(msg, safe=False)
+		new = SystemMessage()
+		new.target = user_id
+		new.message_title = title
+		new.message_content = content
+		new.save()
+		msg['message'] = 'OK'
+		return JsonResponse(msg, safe=False)
+	except:
+		traceback.print_exc()
+		msg['message'] = 'Unexpected Error'
+		return JsonResponse(msg, safe=False)
+
+def read_system_message(request):
+	try:
+		dict = request.GET
+		msg = {}
+		msg['message'] = ''
+		message_id = dict.get('message_id', None)
+		if message_id == None:
+			msg['message'] = '消息记录id不能为空。'
+			return JsonResponse(msg, safe=False)
+		message = SystemMessage.objects.filter(id=message_id)
+		if message:
+			message.update(is_read=1)
+			msg['message'] = 'OK'
+			return JsonResponse(msg, safe=False)
+		else:
+			msg['message'] = '消息记录不存在。'
+			return JsonResponse(msg, safe=False)
+	except:
+		traceback.print_exc()
+		msg['message'] = 'Unexpected Error'
+		return JsonResponse(msg, safe=False)
+
 url_zym = [
 	url('usercourse', get_course_by_userid),
 	url('userdetail', get_userinfo_by_userid),
@@ -305,4 +397,7 @@ url_zym = [
 	url('class/quit', quit_course),
 	url('class/delete', quit_delete),
 	url('class/asowner', get_courses_in_possession),
+	url('class/application/asreceiver', get_applications_by_user_id),
+	url('sysmessage/send', send_system_message),
+	url('sysmessage/read', read_system_message),
 	]
