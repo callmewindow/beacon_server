@@ -283,6 +283,13 @@ def get_courses_in_possession(request):
 				c = model_to_dict(i)
 				course_list.append(c)
 			msg['course_list'] = course_list
+			teacher = Userinfo.objects.filter(id=userid).first()
+			if teacher:
+				teacher_dict = model_to_dict(teacher)
+				msg['teacher'] = teacher_dict
+			else:
+				msg['message'] = '无效的用户id。'
+				return JsonResponse(msg, safe=False)
 			msg['message'] = 'OK'
 			return JsonResponse(msg, safe=False)
 		else:

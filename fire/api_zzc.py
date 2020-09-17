@@ -35,6 +35,7 @@ def createCourse(request):
     start_time=dict.get('start_time')
     end_time=dict.get('end_time')
     profession=dict.get('profession')
+    teacher_id = dict.get('teacher_id')
 
     course=Course()
     course.course_name=course_name
@@ -43,6 +44,7 @@ def createCourse(request):
     course.start_time=datetime.datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
     course.end_time=datetime.datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
     course.profession=profession
+    course.teacher_id = teacher_id
 
     try:
         course.save()
