@@ -301,9 +301,49 @@ def searchStudent(request):
         send_uu["school"] = user.school
         send_uu["school_id"] = user.school_id
         send_uu["realname"] = user.realname
-        send_uu["profession"] = user.profession
+        send_uu["profession"] = user.profession        
+
+        #还要查这个人所相关的课
+        records = UserCourse.objects.filter(user_id=s.user_id)
+        all_courses = [r.course_id for r in records]
+
+        send_course = []
+
+        #这里遍历每一个课程id
+        for a in all_courses:
+            c = Course.objects.get(id=a)
+            cc = {}
+            cc["course_name"] = c.course_name
+            cc["course_intro"] = c.course_intro
+            cc["rule"] = c.rule
+            cc["start_time"] = c.start_time
+            cc["end_time"] = c.end_time
+            cc["profession"] = c.profession
+            cc["is_open"] = c.is_open
+            cc["tearcher_id"] = c.teacher_id_id
+            send_course += [cc]
+            
+        # #从course里面找到所有信息
+        
+        # course = Course.objects.filter(id=s.course_id)
+
+        # for c in course:
+        #     cc = {}
+        #     cc["course_name"] = c.course_name
+        #     cc["course_intro"] = c.course_intro
+        #     cc["rule"] = c.rule
+        #     cc["start_time"] = c.start_time
+        #     cc["end_time"] = c.end_time
+        #     cc["profession"] = c.profession
+        #     cc["is_open"] = c.is_open
+        #     cc["tearcher_id"] = c.teacher_id_id
+        #     send_course += [cc]
+
+        send_uu["course"] = send_course
 
         send_u += [send_uu]
+        # send_u += [send_course]
+    
 
     send = {}
     send["students"] = send_u
