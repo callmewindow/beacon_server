@@ -407,6 +407,12 @@ def sendFriendApplication(request):
             msg['result'] = 'empty application time'
             return HttpResponse(json_raw(msg))
 
+        friend_record1 = FriendRecord.objects.filter(user1_id=applicant_id, user2_id=target_id)
+        friend_record2 = FriendRecord.objects.filter(user1_id=target_id, user2_id=applicant_id)
+        if friend_record1 or friend_record2:
+            msg['result'] = 'already friend'
+            return HttpResponse(json_raw(msg))
+
         friendApplication = FriendApplication.objects.filter(applicant_id=applicant_id, target_id=target_id)
         if friendApplication:
             msg['result'] = 'already applied'
