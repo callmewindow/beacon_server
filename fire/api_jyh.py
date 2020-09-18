@@ -546,7 +546,7 @@ def updateUser(request):
     
     user_id = request.POST.get("user_id", -1)
     if(user_id == -1):
-        msg = '需要课程id'
+        msg = '需要用户id'
         res = '{"message":' + '"' + msg + '"' +'}'
         return HttpResponse(res)
     
@@ -697,6 +697,7 @@ def searchFriend(request):
         #查表找信息
         user = Userinfo.objects.get(id=f.user2_id)
         send_uu = {}
+        send_uu["id"] = user.id
         send_uu["username"] = user.username
         send_uu["user_password"] = user.user_password
         send_uu["user_nickname"] = user.user_nickname
