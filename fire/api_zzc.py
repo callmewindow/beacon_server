@@ -28,7 +28,6 @@ def createCourse(request):
     # profession = dict['profession']
 
     dict = request.POST
-    print(dict)
     course_name=dict.get('course_name')
     course_intro=dict.get('course_intro')
     # rule=dict.get('rule')
@@ -44,7 +43,7 @@ def createCourse(request):
     course.start_time=datetime.datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
     course.end_time=datetime.datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
     course.profession=profession
-    course.teacher_id = teacher_id
+    course.teacher_id_id = teacher_id
 
     try:
         course.save()
@@ -418,6 +417,10 @@ def sendFriendApplication(request):
         friendApplication.application_content = application_content
         friendApplication.application_time = datetime.datetime.strptime(application_time, '%Y-%m-%d %H:%M:%S')
         friendApplication.save()
+        # userinfo = Userinfo.objects.filter(id=applicant_id).first()
+        # msg['username'] = userinfo.username
+        # msg['user_nickname'] = userinfo.user_nickname
+        # msg['applicant_id'] = applicant_id
         msg['result'] = 'success'
         return HttpResponse(json_raw(msg))
     except:
@@ -450,6 +453,10 @@ def passFriendApplication(request):
             return HttpResponse(json_raw(msg))
         friendApplication.result = 1
         friendApplication.save()
+        friendRecord = FriendRecord()
+        friendRecord.user1_id = applicant_id
+        friendRecord.user2_id = target_id
+        friendRecord.save()
         msg['result'] = 'success'
         return HttpResponse(json_raw(msg))
     except:
@@ -514,6 +521,11 @@ def getFriendApplicationOfYourself(request):
             one_application['application_content'] = friendApplication.application_content
             one_application['application_time'] = datetime.datetime.strftime(friendApplication.application_time, '%Y-%m-%d %H:%M:%S')
             one_application['result'] = friendApplication.result
+            target_id = friendApplication.target_id
+            userinfo = Userinfo.objects.filter(id=target_id).first()
+            one_application['username'] = userinfo.username
+            one_application['user_nickname'] = userinfo.user_nickname
+            one_application['target_id'] = target_id
             applications.append(one_application)
         return HttpResponse(json.dumps(applications, ensure_ascii=False))
     except:
@@ -546,6 +558,11 @@ def getFriendApplicationOfOthers(request):
             one_application['application_content'] = friendApplication.application_content
             one_application['application_time'] = datetime.datetime.strftime(friendApplication.application_time, '%Y-%m-%d %H:%M:%S')
             one_application['result'] = friendApplication.result
+            applicant_id = friendApplication.applicant_id
+            userinfo = Userinfo.objects.filter(id=applicant_id).first()
+            one_application['username'] = userinfo.username
+            one_application['user_nickname'] = userinfo.user_nickname
+            one_application['applicant_id'] = applicant_id
             applications.append(one_application)
         return HttpResponse(json.dumps(applications, ensure_ascii=False))
     except:
