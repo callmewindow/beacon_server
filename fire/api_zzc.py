@@ -234,6 +234,7 @@ def uploadUserCourse2(request):
             userinfo.realname = row_value[2]
             userinfo.email = row_value[3]
             userinfo.user_password = 'beacon123'
+            userinfo.user_nickname = row_value[3]
             try:
                 userinfo.save()
             except Exception:
@@ -263,6 +264,9 @@ def uploadUserCourse2(request):
             userCourse.user_id = user_id
             userCourse.course_id = course_id
             userCourse.user_identity = 0  # 每日任务-共享信息
+            userCourse.point = 0
+            userCourse.watch_duration = 0
+            userCourse.watch_num = 0
             try:
                 userCourse.save()
             except Exception:
